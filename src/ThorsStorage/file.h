@@ -97,8 +97,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             bool good()                             const   {return !(state & (eofbit | badbit | failbit));}
             bool eof()                              const   {return state & eofbit;}
             bool bad()                              const   {return state & badbit;}
-            bool fail()                             const   {return (state & (eofbit | failbit | badbit)) == (failbit | badbit);}
-            operator bool()                         const   {return good() || !fail();}
+            bool fail()                             const   {return state & (failbit | badbit);}
+            operator bool()                         const   {return !fail();}
             bool operator!()                        const   {return !static_cast<bool>(*this);}
 
 
