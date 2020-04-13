@@ -160,5 +160,12 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
 }
 
+#if defined(HEADER_ONLY) && HEADER_ONLY == 1
+#include "file.source"
+#endif
+
+#ifndef COVERAGE_TEST
+#include "file.tpp"
+#endif
 
 #endif
