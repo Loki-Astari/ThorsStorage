@@ -269,9 +269,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    Impl::OpenStateBuilderType<T> FileBase<S, T>::doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>)
+    Impl::OpenStateTuple<T> FileBase<S, T>::doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>)
     {
-        Impl::OpenStateBuilderType<T> result = std::make_tuple([this, &ok, mode]()
+        Impl::OpenStateTuple<T> result = std::make_tuple([this, &ok, mode]()
         {
             auto& file          = std::get<I>(fileTuple);
 
@@ -290,7 +290,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileBase<S, T>::doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenStateBuilderType<T> const& state, std::index_sequence<I...>)
+    void FileBase<S, T>::doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenStateTuple<T> const& state, std::index_sequence<I...>)
     {
         ([this, ok, mode, &state]()
         {

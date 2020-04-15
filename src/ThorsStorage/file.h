@@ -74,50 +74,48 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         using FileTupleColumnBuilderType = typename FileTupleColumnBuilder<S, T, TUP>::FileTuple;
 
         /*
-         * OpenState
+         * XXOpenState
          * Use template recursion to get the state of opening files.
          * Thus we can scan to see if an open would work (and clean up afterwords).
          */
         enum PreOpenState {NoAction, NoDir, DirExists};
 
-        template<typename T, typename TUP = typename ThorsAnvil::Serialize::Traits<T>::Members>
+        template<typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
         struct OpenStateBuilder;
 
-        template<typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
-        struct OpenStateColumn;
-
         template<typename T>
-        struct OpenStateColumn<T, ThorsAnvil::Serialize::TraitType::Value>
+        struct OpenMemberTupleBuilder;
+
+        template<typename... Args>
+        struct OpenMemberTupleBuilder<std::tuple<Args...>>
         {
-            using OpenState = PreOpenState;
+            using Tuple = std::tuple<typename OpenStateBuilder<GetPointerMemberType<Args>>::OpenStateType...>;
         };
 
         template<typename T>
-        struct OpenStateColumn<T, ThorsAnvil::Serialize::TraitType::Map>
+        using OpenMemberTupleBuilderType = typename OpenMemberTupleBuilder<T>::Tuple;
+
+        template<typename T>
+        struct OpenStateBuilder<T, ThorsAnvil::Serialize::TraitType::Value>
         {
-            using OpenState = typename OpenStateBuilder<T>::OpenStateTuple;
+            using OpenStateType = PreOpenState;
         };
 
         template<typename T>
-        using OpenStateColumnType = typename OpenStateColumn<T>::OpenState;
-
-        template<typename T, typename... Args>
-        struct OpenStateBuilder<T, std::tuple<Args...>>
+        struct OpenStateBuilder<T, ThorsAnvil::Serialize::TraitType::Map>
         {
-            using OpenStateTuple = std::tuple<OpenStateColumnType<GetPointerMemberType<Args>>...>;
+            struct OpenStateType
+            {
+                using OpenMemberTuple = OpenMemberTupleBuilderType<typename ThorsAnvil::Serialize::Traits<T>::Members>;
+                PreOpenState        base;
+                OpenMemberTuple     members;
+            };
         };
 
-        // Holds the open state of a potential scan.
-
         template<typename T>
-        using OpenStateBuilderType = typename OpenStateBuilder<T>::OpenStateTuple;
-
+        using OpenState      = typename OpenStateBuilder<T>::OpenStateType;
         template<typename T>
-        struct OpenState
-        {
-            PreOpenState            base;
-            OpenStateBuilderType<T> members;
-        };
+        using OpenStateTuple = typename OpenState<T>::OpenMemberTuple;
 
         // File System Functionality
         struct FileSystem
@@ -189,10 +187,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void writeMembers(T const& data, std::index_sequence<I...>);
 
             template<std::size_t... I>
-            Impl::OpenStateBuilderType<T> doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>);
+            Impl::OpenStateTuple<T> doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>);
 
             template<std::size_t... I>
-            void doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenStateBuilderType<T> const& state, std::index_sequence<I...>);
+            void doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenStateTuple<T> const& state, std::index_sequence<I...>);
 
             template<std::size_t... I>
             void doCloseMembers(std::index_sequence<I...>);
