@@ -8,19 +8,8 @@
 #include "file.tpp"
 #include "test/Person.h"
 
-using ThorsAnvil::FileSystem::ColumnFormat::Impl::FileReader;
-using ThorsAnvil::FileSystem::ColumnFormat::Impl::FileWriter;
-using ThorsAnvil::FileSystem::ColumnFormat::Impl::OpenState;
 using ThorsAnvil::FileSystem::ColumnFormat::Impl::OpenStateBuilderType;
 using ThorsAnvil::FileSystem::ColumnFormat::FileBase;
-
-template void FileReader<FileBase<std::fstream, Person>, Person>::read(FileBase<std::fstream, Person>&, Person&);
-template void FileReader<std::fstream, int>::read(std::fstream&, int&);
-template void FileReader<std::fstream, std::string>::read(std::fstream&, std::string&);
-
-template void FileWriter<FileBase<std::fstream, Person>, Person>::write(FileBase<std::fstream, Person>&, Person const&);
-template void FileWriter<std::fstream, int>::write(std::fstream&, int const&);
-template void FileWriter<std::fstream, std::string>::write(std::fstream&, std::string const&);
 
 template FileBase<std::fstream, Person>::FileBase(std::string, std::ios_base::openmode);
 
@@ -40,8 +29,5 @@ template void FileBase<std::fstream, Person>::readMembers<0, 1>(Person&, std::in
 
 template std::string FileBase<std::fstream, Person>::getMemberFilePath<0>();
 template std::string FileBase<std::fstream, Person>::getMemberFilePath<1>();
-
-template OpenState<Person> FileBase<std::fstream, Person>::doOpenTry(bool& ok, std::string&& fileName, std::ios_base::openmode mode);
-template void              FileBase<std::fstream, Person>::doOpenFinalize(bool ok, std::string&& path, std::ios_base::openmode mode, Impl::OpenState<Person> const& state);
 
 #endif

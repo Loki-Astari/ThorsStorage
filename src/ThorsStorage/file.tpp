@@ -11,47 +11,25 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     namespace Impl
     {
-        // Read an item from a file.
-        // This could be a std::ifstream or IFile
-        // Specializations for:
+        // Open/Read/Write an item from a file.
+        // This could be a std::fstream or IFile or OFile or IOFile
         //      Basic types (Value) as they are fixed size.
         //      std::string:        Also a value type but not fixed size.
         template<typename F, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
-        struct FileReader
+        struct FileAccessObject
         {
+            OpenState<T> openTry(bool& ok, F& file, std::string&& path, std::ios_base::openmode mode)
+            {
+                return file.doOpenTry(ok, std::move(path), mode);
+            }
+            void openFinalize(bool ok, F& file, std::string&& path, std::ios_base::openmode mode, OpenState<T> const& state)
+            {
+                file.doOpenFinalize(ok, std::move(path), mode, state);
+            }
             void read(F& file, T& obj)
             {
                 file >> obj;
             }
-        };
-
-        template<typename T>
-        struct FileReader<std::ifstream, T, ThorsAnvil::Serialize::TraitType::Value>
-        {
-            void read(std::istream& file, T& obj)
-            {
-                file.read(reinterpret_cast<char*>(&obj), sizeof obj);
-            }
-        };
-
-        template<>
-        struct FileReader<std::ifstream, std::string, ThorsAnvil::Serialize::TraitType::Value>
-        {
-            void read(std::istream& file, std::string& obj)
-            {
-                std::getline(file, obj);
-                std::transform(std::begin(obj), std::end(obj), std::begin(obj), [](char x){return x == '\0' ? '\n' : x;});
-            }
-        };
-
-        // Write an item from a file.
-        // This could be a std::ofstream or OFile
-        // Specializations for:
-        //      Basic types (Value) as they are fixed size.
-        //      std::string:        Also a value type but not fixed size.
-        template<typename F, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
-        struct FileWriter
-        {
             void write(F& file, T const& obj)
             {
                 file << obj;
@@ -59,18 +37,49 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         };
 
         template<typename T>
-        struct FileWriter<std::ofstream, T, ThorsAnvil::Serialize::TraitType::Value>
+        struct FileAccessObject<std::fstream, T, ThorsAnvil::Serialize::TraitType::Value>
         {
-            void write(std::ostream& file, T const& obj)
+            PreOpenState openTry(bool& ok, std::fstream&, std::string const& path, std::ios_base::openmode mode)
+            {
+                ok = ok && FileSystem::isFileOpenable(path, mode);
+                return NoAction;
+            }
+            void openFinalize(bool ok, std::fstream& file, std::string const& path, std::ios_base::openmode mode, PreOpenState const&)
+            {
+                if (ok)
+                {   file.open(path.c_str(), mode);
+                }
+            }
+            void read(std::fstream& file, T& obj)
+            {
+                file.read(reinterpret_cast<char*>(&obj), sizeof obj);
+            }
+            void write(std::fstream& file, T const& obj)
             {
                 file.write(reinterpret_cast<char const*>(&obj), sizeof obj);
             }
         };
 
         template<>
-        struct FileWriter<std::ofstream, std::string, ThorsAnvil::Serialize::TraitType::Value>
+        struct FileAccessObject<std::fstream, std::string, ThorsAnvil::Serialize::TraitType::Value>
         {
-            void write(std::ostream& file, std::string const& obj)
+            PreOpenState openTry(bool& ok, std::fstream&, std::string const& path, std::ios_base::openmode mode)
+            {
+                ok = ok && FileSystem::isFileOpenable(path, mode);
+                return NoAction;
+            }
+            void openFinalize(bool ok, std::fstream& file, std::string const& path, std::ios_base::openmode mode, PreOpenState const&)
+            {
+                if (ok)
+                {   file.open(path.c_str(), mode);
+                }
+            }
+            void read(std::fstream& file, std::string& obj)
+            {
+                std::getline(file, obj);
+                std::transform(std::begin(obj), std::end(obj), std::begin(obj), [](char x){return x == '\0' ? '\n' : x;});
+            }
+            void write(std::fstream& file, std::string const& obj)
             {
                 std::string::const_iterator start   = std::begin(obj);
                 std::size_t                 used    = 0;
@@ -85,39 +94,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                     used  += (len + 1);
                 }
                 file << std::string_view(&*start) << "\n";
-            }
-        };
-
-        // FileOpener
-        template<typename F, typename O>
-        struct FileOpener;
-
-        template<typename F, typename O>
-        struct FileOpener
-        {
-            O openTry(bool& ok, F& file, std::string&& path, std::ios_base::openmode mode)
-            {
-                return file.doOpenTry(ok, std::move(path), mode);
-            }
-            void openFinalize(bool ok, F& file, std::string&& path, std::ios_base::openmode mode, O const& state)
-            {
-                file.doOpenFinalize(ok, std::move(path), mode, state);
-            }
-        };
-
-        template<>
-        struct FileOpener<std::fstream, PreOpenState>
-        {
-            PreOpenState openTry(bool& ok, std::fstream&, std::string const& path, std::ios_base::openmode mode)
-            {
-                ok = ok && FileSystem::isFileOpenable(path, mode);
-                return NoAction;
-            }
-            void openFinalize(bool ok, std::fstream& file, std::string const& path, std::ios_base::openmode mode, PreOpenState const&)
-            {
-                if (ok)
-                {   file.open(path.c_str(), mode);
-                }
             }
         };
 
@@ -297,12 +273,15 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         Impl::OpenStateBuilderType<T> result = std::make_tuple([this, &ok, mode]()
         {
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using OpenR         = std::tuple_element_t<I, Impl::OpenStateBuilderType<T>>;
-            File& file          = std::get<I>(fileTuple);
+            auto& file          = std::get<I>(fileTuple);
 
-            Impl::FileOpener<File, OpenR>   opener;
-            auto result = opener.openTry(ok, file, getMemberFilePath<I>(), mode);
+            using File          = std::tuple_element_t<I, FileTuple>;
+            using PointerType   = std::tuple_element_t<I, Members>;
+            using Dst           = Impl::GetPointerMemberType<PointerType>;
+
+            Impl::FileAccessObject<File, Dst>    fileAccess;
+            auto result = fileAccess.openTry(ok, file, getMemberFilePath<I>(), mode);
+            setstateLocalOnly(file.rdstate());
             return result;
         }()...);
 
@@ -315,12 +294,16 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, ok, mode, &state]()
         {
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using OpenR         = std::tuple_element_t<I, Impl::OpenStateBuilderType<T>>;
-            File& file          = std::get<I>(fileTuple);
+            auto& file          = std::get<I>(fileTuple);
 
-            Impl::FileOpener<File, OpenR>   opener;
-            opener.openFinalize(ok, file, getMemberFilePath<I>(), mode, std::get<I>(state));
+            using File          = std::tuple_element_t<I, FileTuple>;
+            using PointerType   = std::tuple_element_t<I, Members>;
+            using Dst           = Impl::GetPointerMemberType<PointerType>;
+
+            Impl::FileAccessObject<File, Dst>    fileAccess;
+            fileAccess.openFinalize(ok, file, getMemberFilePath<I>(), mode, std::get<I>(state));
+            setstateLocalOnly(file.rdstate());
+
         }(), ...);
     }
 
@@ -351,8 +334,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             using PointerType   = std::tuple_element_t<I, Members>;
             using Dst           = Impl::GetPointerMemberType<PointerType>;
 
-            Impl::FileReader<File, Dst>    fileReader;
-            fileReader.read(file, data.*pointer);
+            Impl::FileAccessObject<File, Dst>    fileAccess;
+            fileAccess.read(file, data.*pointer);
             setstateLocalOnly(file.rdstate());
         }(), ...);
     }
@@ -384,8 +367,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             using PointerType   = std::tuple_element_t<I, Members>;
             using Dst           = Impl::GetPointerMemberType<PointerType>;
 
-            Impl::FileWriter<File, Dst>    fileWriter;
-            fileWriter.write(file, data.*pointer);
+            Impl::FileAccessObject<File, Dst>    fileAccess;
+            fileAccess.write(file, data.*pointer);
             setstateLocalOnly(file.rdstate());
         }(), ...);
     }
