@@ -21,6 +21,19 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     namespace Impl
     {
+        // Get the type being pointed at by a pointer to member variable.
+        template<typename P>
+        struct GetPointerMember;
+
+        template<typename R, typename T>
+        struct GetPointerMember<std::pair<char const*, R T::*>>
+        {
+            using ReturnType = R;
+        };
+
+        template<typename P>
+        using GetPointerMemberType = typename GetPointerMember<P>::ReturnType;
+
         /*
          * FileTupleColumn: Use template specialization to define the stream class used.
          *                  For basic objects this is `std::fstream`
@@ -35,36 +48,85 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         {
             using ColumnType  = S;
         };
+
         template<typename S, typename T>
         struct FileTupleColumn<S, T, ThorsAnvil::Serialize::TraitType::Map>
         {
             using ColumnType  = FileBase<S, T>;
         };
 
-        /*
-         * FileTupleColumnBuilder:  Build a tuple of streaming objects.
-         *                          One for each member.
-         */
-        template<typename S, typename T, typename P>
-        struct FileTupleColumnBuilder;
-
-        template<typename S, typename T, typename P>
-        struct FileTupleColumnBuilder<S, T, std::pair<char const*, P T::*>>
-        {
-            using ColumnType = typename FileTupleColumn<S, P>::ColumnType;
-        };
+        template<typename S, typename T>
+        using FileTupleColumnType = typename FileTupleColumn<S, T>::ColumnType;
 
         /*
          * FileTupleBuilderFromArgs:    Iterate over a tuple to get the stream types.
          */
         template<typename S, typename T, typename TUP>
-        struct FileTupleBuilderFromArgs;
+        struct FileTupleColumnBuilder;
 
         template<typename S, typename T, typename... Args>
-        struct FileTupleBuilderFromArgs<S, T, std::tuple<Args...>>
+        struct FileTupleColumnBuilder<S, T, std::tuple<Args...>>
         {
-            using FileTuple = std::tuple<typename FileTupleColumnBuilder<S, T, Args>::ColumnType...>;
+            using FileTuple = std::tuple<FileTupleColumnType<S, GetPointerMemberType<Args>>...>;
         };
+
+        template<typename S, typename T, typename TUP>
+        using FileTupleColumnBuilderType = typename FileTupleColumnBuilder<S, T, TUP>::FileTuple;
+
+        /*
+         * OpenState
+         * Use template recursion to get the state of opening files.
+         * Thus we can scan to see if an open would work (and clean up afterwords).
+         */
+        enum PreOpenState {NoAction, NoDir, DirExists};
+
+        template<typename T, typename TUP = typename ThorsAnvil::Serialize::Traits<T>::Members>
+        struct OpenStateBuilder;
+
+        template<typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
+        struct OpenStateColumn;
+
+        template<typename T>
+        struct OpenStateColumn<T, ThorsAnvil::Serialize::TraitType::Value>
+        {
+            using OpenState = PreOpenState;
+        };
+
+        template<typename T>
+        struct OpenStateColumn<T, ThorsAnvil::Serialize::TraitType::Map>
+        {
+            using OpenState = typename OpenStateBuilder<T>::OpenStateTuple;
+        };
+
+        template<typename T>
+        using OpenStateColumnType = typename OpenStateColumn<T>::OpenState;
+
+        template<typename T, typename... Args>
+        struct OpenStateBuilder<T, std::tuple<Args...>>
+        {
+            using OpenStateTuple = std::tuple<OpenStateColumnType<GetPointerMemberType<Args>>...>;
+        };
+
+        // Holds the open state of a potential scan.
+
+        template<typename T>
+        using OpenStateBuilderType = typename OpenStateBuilder<T>::OpenStateTuple;
+
+        template<typename T>
+        struct OpenState
+        {
+            PreOpenState            base;
+            OpenStateBuilderType<T> members;
+        };
+
+        // File System Functionality
+        struct FileSystem
+        {
+            enum DirResult {DirAlreadyExists, DirCreated, DirFailedToCreate};
+            static DirResult makeDirectory(std::string const& path, std::ios_base::openmode mode);
+            static bool      isFileOpenable(std::string const& path, std::ios_base::openmode mode);
+        };
+
     }
 
     template<typename S, typename T>
@@ -80,7 +142,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         using Members   = typename Traits::Members;
         using Index     = std::make_index_sequence<std::tuple_size<Members>::value>;
 
-        using FileTuple = typename Impl::FileTupleBuilderFromArgs<S, T, Members>::FileTuple;
+        using FileTuple = Impl::FileTupleColumnBuilderType<S, T, Members>;
 
         bool            fileOpened;
         std::string     baseFileName;
@@ -104,7 +166,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
             iostate rdstate()                       const   {return state;}
             void setstate(iostate extraState)               {setstateLocalOnly(extraState);setstateSubFiles(extraState, Index{});}
-            void clear(iostate newState = goodbit)          {state  = newState;}
+            void clear(iostate newState = goodbit)          {clearLocalOnly(newState);clearSubFiles(newState, Index{});}
 
             void read(T& data);
             void write(T const& data);
@@ -127,16 +189,30 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void writeMembers(T const& data, std::index_sequence<I...>);
 
             template<std::size_t... I>
-            void doOpenMembers(std::ios_base::openmode mode, std::index_sequence<I...>);
+            Impl::OpenStateBuilderType<T> doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>);
+
+            template<std::size_t... I>
+            void doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenStateBuilderType<T> const& state, std::index_sequence<I...>);
 
             template<std::size_t... I>
             void doCloseMembers(std::index_sequence<I...>);
 
             void open(std::ios_base::openmode mode);
-            void setstateLocalOnly(iostate extraState)     {state |= extraState;}
+            void setstateLocalOnly(iostate extraState)      {state |= extraState;}
+            void clearLocalOnly(iostate newState)           {state = newState;}
 
             template<std::size_t... I>
             void setstateSubFiles(iostate extraState, std::index_sequence<I...>);
+            template<std::size_t... I>
+            void clearSubFiles(iostate newState, std::index_sequence<I...>);
+
+            template<std::size_t I>
+            std::string getMemberFilePath();
+
+
+        public:
+            Impl::OpenState<T> doOpenTry(bool& ok, std::string&& fileName, std::ios_base::openmode mode);
+            void               doOpenFinalize(bool ok, std::string&& path, std::ios_base::openmode mode, Impl::OpenState<T> const& state);
     };
 
     template<typename T>

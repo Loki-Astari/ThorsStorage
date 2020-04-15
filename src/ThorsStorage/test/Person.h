@@ -10,6 +10,13 @@ struct Person
     int         age;
 };
 
+struct TwoPeople
+{
+    Person personOne;
+    Person personTwo;
+};
+
 ThorsAnvil_MakeTrait(Person, name, age);
+ThorsAnvil_MakeTrait(TwoPeople, personOne, personTwo);
 
 #endif
