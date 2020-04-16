@@ -103,7 +103,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // File System Stuff
         FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, std::ios_base::openmode mode)
         {
-            struct stat        info;
+            using StatusInfo = struct stat;
+
+            StatusInfo        info;
             for (std::size_t pos = path.find('/'); pos != std::string::npos; pos = path.find(pos + 1, '/'))
             {
                 std::string     subPath = path.substr(0, pos);
