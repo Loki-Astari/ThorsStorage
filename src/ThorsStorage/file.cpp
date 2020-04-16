@@ -16,6 +16,9 @@ template FileBase<std::ifstream, TwoPeople>::FileBase(std::string, std::ios_base
 template FileBase<std::ofstream, TwoPeople>::FileBase(std::string, std::ios_base::openmode);
 template FileBase<std::fstream,  Person>::FileBase(std::string, std::ios_base::openmode);
 
+template void FileBase<std::fstream,  TwoPeople>::open(std::string, std::ios_base::openmode);
+template void FileBase<std::ifstream, TwoPeople>::open(std::string, std::ios_base::openmode);
+template void FileBase<std::ofstream, TwoPeople>::open(std::string, std::ios_base::openmode);
 template void FileBase<std::fstream,  Person>::open(std::string, std::ios_base::openmode);
 template void FileBase<std::fstream,  Person>::open(std::ios_base::openmode);
 template void FileBase<std::fstream,  Person>::close();
