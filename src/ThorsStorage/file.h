@@ -14,7 +14,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     /*
      * File: The class we want to define.
-     *       Forward declaration so it can be used in FileTupleColumn.
+     *       Forward declaration so it can be used in FileTypeSelector.
      */
     template<typename S, typename T>
     class FileBase;
@@ -35,87 +35,91 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         using GetPointerMemberType = typename GetPointerMember<P>::ReturnType;
 
         /*
-         * FileTupleColumn: Use template specialization to define the stream class used.
-         *                  For basic objects this is `std::fstream`
-         *                  For Json::Map types use a FileBase<T> types as this will recursively contain
-         *                  File<M> or `std::fstream` types.
+         * FileTypeSelector:    Use template specialization to define the stream class used.
+         *                      For basic objects this is `std::fstream`
+         *                      For Json::Map types use a FileBase<T> types as this will recursively contain
+         *                      File<M> or `std::fstream` types.
          */
         template<typename S, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
-        struct FileTupleColumn;
+        struct FileTypeSelector;
 
         template<typename S, typename T>
-        struct FileTupleColumn<S, T, ThorsAnvil::Serialize::TraitType::Value>
+        struct FileTypeSelector<S, T, ThorsAnvil::Serialize::TraitType::Value>
         {
-            using ColumnType  = S;
+            using FileType  = S;
         };
 
         template<typename S, typename T>
-        struct FileTupleColumn<S, T, ThorsAnvil::Serialize::TraitType::Map>
+        struct FileTypeSelector<S, T, ThorsAnvil::Serialize::TraitType::Map>
         {
-            using ColumnType  = FileBase<S, T>;
+            using FileType  = FileBase<S, T>;
         };
 
         template<typename S, typename T>
-        using FileTupleColumnType = typename FileTupleColumn<S, T>::ColumnType;
+        using FileType = typename FileTypeSelector<S, T>::FileType;
 
         /*
-         * FileTupleBuilderFromArgs:    Iterate over a tuple to get the stream types.
+         * FileTupleBuilder:    Iterate over a tuple to get the stream types.
          */
-        template<typename S, typename T, typename TUP>
-        struct FileTupleColumnBuilder;
+        template<typename S, typename T, typename TUP = typename ThorsAnvil::Serialize::Traits<T>::Members>
+        struct TupleFileTypeBuilder;
 
         template<typename S, typename T, typename... Args>
-        struct FileTupleColumnBuilder<S, T, std::tuple<Args...>>
+        struct TupleFileTypeBuilder<S, T, std::tuple<Args...>>
         {
-            using FileTuple = std::tuple<FileTupleColumnType<S, GetPointerMemberType<Args>>...>;
+            using TupleFileType = std::tuple<FileType<S, GetPointerMemberType<Args>>...>;
         };
 
-        template<typename S, typename T, typename TUP>
-        using FileTupleColumnBuilderType = typename FileTupleColumnBuilder<S, T, TUP>::FileTuple;
+        template<typename S, typename T>
+        using TupleFileType = typename TupleFileTypeBuilder<S, T>::TupleFileType;
 
         /*
-         * XXOpenState
-         * Use template recursion to get the state of opening files.
-         * Thus we can scan to see if an open would work (and clean up afterwords).
+         * OpenStateSelector:   Select if we use PreOpenState (for std::fstream) or a struct (for FileBase)
          */
         enum PreOpenState {NoAction, NoDir, DirExists};
 
         template<typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
-        struct OpenStateBuilder;
+        struct OpenStateSelector;
 
+        /*
+         * OpenStateBuilder:   Build a tuple of (OpenStateSelector) for the underlying stream types.
+         */
         template<typename T>
-        struct OpenMemberTupleBuilder;
+        struct OpenStateTupleBuilder;
 
         template<typename... Args>
-        struct OpenMemberTupleBuilder<std::tuple<Args...>>
+        struct OpenStateTupleBuilder<std::tuple<Args...>>
         {
-            using Tuple = std::tuple<typename OpenStateBuilder<GetPointerMemberType<Args>>::OpenStateType...>;
+            using OpenStateTuple = std::tuple<typename OpenStateSelector<GetPointerMemberType<Args>>::OpenState...>;
         };
 
         template<typename T>
-        using OpenMemberTupleBuilderType = typename OpenMemberTupleBuilder<T>::Tuple;
+        using OpenStateTuple = typename OpenStateTupleBuilder<T>::OpenStateTuple;
 
         template<typename T>
-        struct OpenStateBuilder<T, ThorsAnvil::Serialize::TraitType::Value>
+        struct OpenStateSelector<T, ThorsAnvil::Serialize::TraitType::Value>
         {
-            using OpenStateType = PreOpenState;
+            using OpenState = PreOpenState;
         };
 
         template<typename T>
-        struct OpenStateBuilder<T, ThorsAnvil::Serialize::TraitType::Map>
+        struct OpenStateSelector<T, ThorsAnvil::Serialize::TraitType::Map>
         {
-            struct OpenStateType
+            struct OpenState
             {
-                using OpenMemberTuple = OpenMemberTupleBuilderType<typename ThorsAnvil::Serialize::Traits<T>::Members>;
+                using OpenMemberTuple = OpenStateTuple<typename ThorsAnvil::Serialize::Traits<T>::Members>;
                 PreOpenState        base;
                 OpenMemberTuple     members;
             };
         };
 
+        /*
+         * The types used after we have built it from the above
+         */
         template<typename T>
-        using OpenState      = typename OpenStateBuilder<T>::OpenStateType;
+        using OpenState      = typename OpenStateSelector<T>::OpenState;
         template<typename T>
-        using OpenStateTuple = typename OpenState<T>::OpenMemberTuple;
+        using OpenMemberTuple = typename OpenState<T>::OpenMemberTuple;
 
         // File System Functionality
         struct FileSystem
@@ -135,12 +139,12 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         static constexpr iostate badbit     = std::ios_base::badbit;
         static constexpr iostate failbit    = std::ios_base::failbit;
         static constexpr iostate eofbit     = std::ios_base::eofbit;
-        
+
         using Traits    = ThorsAnvil::Serialize::Traits<T>;
         using Members   = typename Traits::Members;
         using Index     = std::make_index_sequence<std::tuple_size<Members>::value>;
 
-        using FileTuple = Impl::FileTupleColumnBuilderType<S, T, Members>;
+        using FileTuple = Impl::TupleFileType<S, T>;
 
         bool            fileOpened;
         std::string     baseFileName;
@@ -187,10 +191,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void writeMembers(T const& data, std::index_sequence<I...>);
 
             template<std::size_t... I>
-            Impl::OpenStateTuple<T> doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>);
+            Impl::OpenMemberTuple<T> doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>);
 
             template<std::size_t... I>
-            void doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenStateTuple<T> const& state, std::index_sequence<I...>);
+            void doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>);
 
             template<std::size_t... I>
             void doCloseMembers(std::index_sequence<I...>);
