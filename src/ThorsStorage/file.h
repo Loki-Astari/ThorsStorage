@@ -222,11 +222,11 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         public:
             IFile(std::string fileName = "", std::ios_base::openmode mode = std::ios::in)
-                : FileBase<std::ifstream, T>(std::forward<std::string>(fileName), mode | std::ios::in)
+                : FileBase<std::ifstream, T>(std::forward<std::string>(fileName), mode)
             {}
             void open(std::string fileName, std::ios_base::openmode mode = std::ios::in)
             {
-                return FileBase<std::ifstream, T>::open(std::forward<std::string>(fileName), mode | std::ios::in);
+                return FileBase<std::ifstream, T>::open(std::forward<std::string>(fileName), mode);
             }
     };
     template<typename T>
@@ -234,11 +234,11 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         public:
             OFile(std::string fileName = "", std::ios_base::openmode mode = std::ios::out)
-                : FileBase<std::ofstream, T>(std::forward<std::string>(fileName), mode | std::ios::out)
+                : FileBase<std::ofstream, T>(std::forward<std::string>(fileName), mode)
             {}
             void open(std::string fileName, std::ios_base::openmode mode = std::ios::out)
             {
-                return FileBase<std::ofstream, T>::open(std::forward<std::string>(fileName), mode | std::ios::out);
+                return FileBase<std::ofstream, T>::open(std::forward<std::string>(fileName), mode);
             }
     };
     template<typename T>
