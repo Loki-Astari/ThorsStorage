@@ -2,6 +2,7 @@
 #define THORSANVIL_FILESYSTEM_COLUMNFORMAT_TEST_TESTCLASS_H
 
 #include "gtest/gtest.h"
+#include <stdexcept>
 
 static char const   testDataDir[]       = "runTestDir";
 
@@ -35,6 +36,13 @@ class TestFileClass: public ::testing::Test
     public:
         TestFileClass()
         {
+            int checkPreCondition = access(testDataDir, F_OK);
+            if (checkPreCondition == 0)
+            {
+                // Run Time Test Directory exists.
+                // A previous test has failed to clean up correctly.
+                throw std::runtime_error("Test Directory Detected: It should not be there");
+            }
             mkdir(testDataDir, 0'777);
         }
         ~TestFileClass()
