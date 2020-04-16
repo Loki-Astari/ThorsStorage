@@ -152,9 +152,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         iostate         state;
 
         public:
-            FileBase(std::string fileName = "", std::ios_base::openmode mode = std::ios_base::out);
+            FileBase(std::string fileName = "", std::ios_base::openmode mode = 0);
 
-            void open(std::string fileName, std::ios_base::openmode mode = std::ios_base::out);
+            void open(std::string fileName, std::ios_base::openmode mode = 0);
             void close();
 
             // https://en.cppreference.com/w/cpp/io/ios_base/iostate
@@ -221,19 +221,37 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     class IFile: public FileBase<std::ifstream, T>
     {
         public:
-            using FileBase<std::ifstream, T>::FileBase;
+            IFile(std::string fileName = "", std::ios_base::openmode mode = std::ios::in)
+                : FileBase<std::ifstream, T>(std::forward<std::string>(fileName), mode | std::ios::in)
+            {}
+            void open(std::string fileName, std::ios_base::openmode mode = std::ios::in)
+            {
+                return FileBase<std::ifstream, T>::open(std::forward<std::string>(fileName), mode | std::ios::in);
+            }
     };
     template<typename T>
     class OFile: public FileBase<std::ofstream, T>
     {
         public:
-            using FileBase<std::ofstream, T>::FileBase;
+            OFile(std::string fileName = "", std::ios_base::openmode mode = std::ios::out)
+                : FileBase<std::ofstream, T>(std::forward<std::string>(fileName), mode | std::ios::out)
+            {}
+            void open(std::string fileName, std::ios_base::openmode mode = std::ios::out)
+            {
+                return FileBase<std::ofstream, T>::open(std::forward<std::string>(fileName), mode | std::ios::out);
+            }
     };
     template<typename T>
     class File: public FileBase<std::fstream, T>
     {
         public:
-            using FileBase<std::fstream, T>::FileBase;
+            File(std::string fileName = "", std::ios_base::openmode mode = std::ios::in | std::ios::out)
+                : FileBase<std::fstream, T>(std::forward<std::string>(fileName), mode)
+            {}
+            void open(std::string fileName, std::ios_base::openmode mode = std::ios::in | std::ios::out)
+            {
+                return FileBase<std::fstream, T>::open(std::forward<std::string>(fileName), mode);
+            }
     };
 
 }

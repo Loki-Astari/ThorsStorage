@@ -74,7 +74,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void openFinalize(bool ok, F& file, std::string const& path, std::ios_base::openmode mode, PreOpenState const&)
             {
                 if (ok)
-                {   file.open(path.c_str(), mode);
+                {
+                    file.open(path.c_str(), mode);
                 }
             }
             void read(F& file, std::string& obj)

@@ -6,11 +6,14 @@
 
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-TEST(ReadTest, ConstructFile)
+using ReadTest = OpenTwoPeopleTest;
+
+TEST_F(ReadTest, ConstructFile)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
         file << TwoPeople{Person{"Martin" ,20}, Person{"Loki", 22}};
+        ASSERT_TRUE(file);
     }
 
     // Just construct and destruct

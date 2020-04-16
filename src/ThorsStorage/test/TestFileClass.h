@@ -48,13 +48,28 @@ class OpenTwoPeopleTest: public TestFileClass
     protected:
         void TearDown() override
         {
+#if 0
+            chmod(simpleTestP1Name, 0'777);
             remove(simpleTestP1Name);
+
+            chmod(simpleTestP1Age, 0'777);
             remove(simpleTestP1Age);
+
+            chmod(simpleTestP1Dir, 0'777);
             remove(simpleTestP1Dir);
+
+            chmod(simpleTestP2Name, 0'777);
             remove(simpleTestP2Name);
+
+            chmod(simpleTestP2Age, 0'777);
             remove(simpleTestP2Age);
+
+            chmod(simpleTestP2Dir, 0'777);
             remove(simpleTestP2Dir);
+
+            chmod(simpleTestDir, 0'777);
             remove(simpleTestDir);
+#endif
         }
 };
 
