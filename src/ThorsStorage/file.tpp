@@ -18,7 +18,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // This could be a std::fstream/std::ifstream/std::ofstream or IFile or OFile or IOFile
         //      Basic types (Value) as they are fixed size.
         //      std::string:        Also a value type but not fixed size.
-        template<typename F, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
+        template<typename F, typename T, ThorsAnvil::Serialize::TraitType type>
         struct FileAccessObject
         {
             F&  file;
@@ -166,16 +166,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             }
             return result;
         }
-#if 0
-        template<std::size_t I>
-        using FileIndex         = std::tuple_element_t<I, FileTuple>;
-        template<std::size_t I>
-        using PointerTypeIndex  = std::tuple_element_t<I, Members>;
-        template<std::size_t I>
-        using DstIndex          = GetPointerMemberType<PointerTypeIndex<I>>;
-        template<std::size_t I>
-        using FileAccessIndex   = FileAccessObject<FileIndex<I>, DstIndex<I>>
-#endif
     }
 
 
@@ -220,13 +210,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, extraState]()
         {
-            auto& file          = std::get<I>(fileTuple);
-
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using PointerType   = std::tuple_element_t<I, Members>;
-            using Dst           = Impl::GetPointerMemberType<PointerType>;
-
-            Impl::FileAccessObject<File, Dst>    fileAccess(file);
+            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.setstate(extraState);
         }(), ...);
     }
@@ -240,13 +224,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, newState]()
         {
-            auto& file          = std::get<I>(fileTuple);
-
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using PointerType   = std::tuple_element_t<I, Members>;
-            using Dst           = Impl::GetPointerMemberType<PointerType>;
-
-            Impl::FileAccessObject<File, Dst>    fileAccess(file);
+            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.clear(newState);
         }(), ...);
     }
@@ -260,13 +238,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this]()
         {
-            auto& file          = std::get<I>(fileTuple);
-
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using PointerType   = std::tuple_element_t<I, Members>;
-            using Dst           = Impl::GetPointerMemberType<PointerType>;
-
-            Impl::FileAccessObject<File, Dst>    fileAccess(file);
+            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.close();
             setstateLocalOnly(fileAccess.rdstate());
         }(), ...);
@@ -340,13 +312,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         Impl::OpenMemberTuple<T> result = std::make_tuple([this, &ok, mode]()
         {
-            auto& file          = std::get<I>(fileTuple);
+            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
 
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using PointerType   = std::tuple_element_t<I, Members>;
-            using Dst           = Impl::GetPointerMemberType<PointerType>;
-
-            Impl::FileAccessObject<File, Dst>    fileAccess(file);
             auto result = fileAccess.openTry(ok, getMemberFilePath<I>(), mode);
             setstateLocalOnly(fileAccess.rdstate());
             return result;
@@ -361,16 +328,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, ok, mode, &state]()
         {
-            auto& file          = std::get<I>(fileTuple);
+            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
 
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using PointerType   = std::tuple_element_t<I, Members>;
-            using Dst           = Impl::GetPointerMemberType<PointerType>;
-
-            Impl::FileAccessObject<File, Dst>    fileAccess(file);
             fileAccess.openFinalize(ok, getMemberFilePath<I>(), mode, std::get<I>(state));
             setstateLocalOnly(fileAccess.rdstate());
-
         }(), ...);
     }
 
@@ -393,15 +354,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, &data]()
         {
-            auto& file          = std::get<I>(fileTuple);
+            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
             auto& members       = Traits::getMembers();
             auto& pointer       = std::get<I>(members).second;
 
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using PointerType   = std::tuple_element_t<I, Members>;
-            using Dst           = Impl::GetPointerMemberType<PointerType>;
-
-            Impl::FileAccessObject<File, Dst>    fileAccess(file);
             fileAccess.read(data.*pointer);
             setstateLocalOnly(fileAccess.rdstate());
         }(), ...);
@@ -426,15 +382,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, &data]()
         {
-            auto& file          = std::get<I>(fileTuple);
+            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
             auto& members       = Traits::getMembers();
             auto& pointer       = std::get<I>(members).second;
 
-            using File          = std::tuple_element_t<I, FileTuple>;
-            using PointerType   = std::tuple_element_t<I, Members>;
-            using Dst           = Impl::GetPointerMemberType<PointerType>;
-
-            Impl::FileAccessObject<File, Dst>    fileAccess(file);
             fileAccess.write(data.*pointer);
             setstateLocalOnly(fileAccess.rdstate());
         }(), ...);

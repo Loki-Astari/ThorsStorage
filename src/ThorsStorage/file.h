@@ -139,6 +139,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             static bool      isFileOpenable(std::string const& path, std::ios_base::openmode mode);
         };
 
+        template<typename F, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
+        struct FileAccessObject;
     }
 
     template<typename S, typename T>
@@ -155,6 +157,15 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         using Index     = std::make_index_sequence<std::tuple_size<Members>::value>;
 
         using FileTuple = Impl::TupleFileType<S, T>;
+
+        template<std::size_t I>
+        using FileIndex         = std::tuple_element_t<I, FileTuple>;
+        template<std::size_t I>
+        using PointerTypeIndex  = std::tuple_element_t<I, Members>;
+        template<std::size_t I>
+        using DstIndex          = Impl::GetPointerMemberType<PointerTypeIndex<I>>;
+        template<std::size_t I>
+        using FileAccessIndex   = Impl::FileAccessObject<FileIndex<I>, DstIndex<I>>;
 
         bool            fileOpened;
         std::string     baseFileName;
