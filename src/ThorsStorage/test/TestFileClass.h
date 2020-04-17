@@ -11,9 +11,11 @@ static char const   testSecondOpenDir[] = "runTestDir/second";
 static char const   simpleTestDir[]     = "runTestDir/PersonData";
 static char const   simpleTestP1Dir[]   = "runTestDir/PersonData/personOne";
 static char const   simpleTestP1Name[]  = "runTestDir/PersonData/personOne/name";
+static char const   simpleTestP1NameI[] = "runTestDir/PersonData/personOne/name.index";
 static char const   simpleTestP1Age[]   = "runTestDir/PersonData/personOne/age";
 static char const   simpleTestP2Dir[]   = "runTestDir/PersonData/personTwo";
 static char const   simpleTestP2Name[]  = "runTestDir/PersonData/personTwo/name";
+static char const   simpleTestP2NameI[] = "runTestDir/PersonData/personTwo/name.index";
 static char const   simpleTestP2Age[]   = "runTestDir/PersonData/personTwo/age";
 
 static char const   lockedTestDir[]     = "runTestDir/lockedDir";
@@ -61,6 +63,9 @@ class OpenTwoPeopleTest: public TestFileClass
             chmod(simpleTestP1Name, 0'777);
             remove(simpleTestP1Name);
 
+            chmod(simpleTestP1NameI, 0'777);
+            remove(simpleTestP1NameI);
+
             chmod(simpleTestP1Age, 0'777);
             remove(simpleTestP1Age);
 
@@ -69,6 +74,9 @@ class OpenTwoPeopleTest: public TestFileClass
 
             chmod(simpleTestP2Name, 0'777);
             remove(simpleTestP2Name);
+
+            chmod(simpleTestP2NameI, 0'777);
+            remove(simpleTestP2NameI);
 
             chmod(simpleTestP2Age, 0'777);
             remove(simpleTestP2Age);

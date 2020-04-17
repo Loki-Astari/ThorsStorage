@@ -49,6 +49,16 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             using FileType  = S;
         };
 
+        template<typename S>
+        struct FileTypeSelector<S, std::string, ThorsAnvil::Serialize::TraitType::Value>
+        {
+            using FileType  = struct FileTypeStruct
+            {
+                S   data;
+                S   index;
+            };
+        };
+
         template<typename S, typename T>
         struct FileTypeSelector<S, T, ThorsAnvil::Serialize::TraitType::Map>
         {
