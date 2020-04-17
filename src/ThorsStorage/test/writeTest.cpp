@@ -8,7 +8,7 @@ namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using WriteTest = OpenTwoPeopleTest;
 
-TEST_F(WriteTest, ConstructFile)
+TEST_F(WriteTest, writeTwoPeople)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);

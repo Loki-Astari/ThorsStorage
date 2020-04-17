@@ -152,7 +152,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     FileBase<S, T>::FileBase(std::string fileName, std::ios_base::openmode mode)
         : fileOpened(false)
         , baseFileName(std::move(fileName))
-        , state(goodbit)
+        , state(failbit)
     {
         open(mode);
     }
@@ -176,6 +176,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             return;
         }
         doCloseMembers(Index{});
+        setstateLocalOnly(failbit);
         fileOpened = false;
     }
 
