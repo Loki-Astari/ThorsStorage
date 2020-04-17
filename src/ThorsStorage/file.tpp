@@ -26,20 +26,20 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 : file(file)
             {}
 
-            OpenState<T> openTry(bool& ok, std::string&& path, std::ios_base::openmode mode)
+            OpenState<T> openTry(bool& ok, std::string&& path, openmode mode)
             {
                 return file.doOpenTry(ok, std::move(path), mode);
             }
-            void openFinalize(bool ok, std::string&& path, std::ios_base::openmode mode, OpenState<T> const& state)
+            void openFinalize(bool ok, std::string&& path, openmode mode, OpenState<T> const& state)
             {
                 file.doOpenFinalize(ok, std::move(path), mode, state);
             }
-            void close()                                        {file.close();}
-            void setstate(std::ios_base::iostate extraState)    {file.setstate(extraState);}
-            void clear(std::ios_base::iostate newState)         {file.clear(newState);}
-            std::ios_base::iostate rdstate() const              {return file.rdstate();}
-            void read(T& obj)                                   {file >> obj;}
-            void write(T const& obj) const                      {file << obj;}
+            void close()                                {file.close();}
+            void setstate(iostate extraState)           {file.setstate(extraState);}
+            void clear(iostate newState)                {file.clear(newState);}
+            iostate rdstate() const                     {return file.rdstate();}
+            void read(T& obj)                           {file >> obj;}
+            void write(T const& obj) const              {file << obj;}
         };
 
         template<typename F, typename T>
@@ -50,24 +50,24 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 : file(file)
             {}
 
-            PreOpenState openTry(bool& ok, std::string const& path, std::ios_base::openmode mode)
+            PreOpenState openTry(bool& ok, std::string const& path, openmode mode)
             {
                 ok = ok && FileSystem::isFileOpenable(path, mode);
                 return NoAction;
             }
-            void openFinalize(bool ok, std::string const& path, std::ios_base::openmode mode, PreOpenState const&)
+            void openFinalize(bool ok, std::string const& path, openmode mode, PreOpenState const&)
             {
                 if (ok)
                 {
                     file.open(path.c_str(), mode);
                 }
             }
-            void close()                                        {file.close();}
-            void setstate(std::ios_base::iostate extraState)    {file.setstate(extraState);}
-            void clear(std::ios_base::iostate newState)         {file.clear(newState);}
-            std::ios_base::iostate rdstate() const              {return file.rdstate();}
-            void read(T& obj)                                   {file.read(reinterpret_cast<char*>(&obj), sizeof obj);}
-            void write(T const& obj) const                      {file.write(reinterpret_cast<char const*>(&obj), sizeof obj);}
+            void close()                                {file.close();}
+            void setstate(iostate extraState)           {file.setstate(extraState);}
+            void clear(iostate newState)                {file.clear(newState);}
+            iostate rdstate() const                     {return file.rdstate();}
+            void read(T& obj)                           {file.read(reinterpret_cast<char*>(&obj), sizeof obj);}
+            void write(T const& obj) const              {file.write(reinterpret_cast<char const*>(&obj), sizeof obj);}
         };
 
         template<typename F>
@@ -78,12 +78,12 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 : file(file)
             {}
 
-            PreOpenState openTry(bool& ok, std::string const& path, std::ios_base::openmode mode)
+            PreOpenState openTry(bool& ok, std::string const& path, openmode mode)
             {
                 ok = ok && FileSystem::isFileOpenable(path, mode);
                 return NoAction;
             }
-            void openFinalize(bool ok, std::string const& path, std::ios_base::openmode mode, PreOpenState const&)
+            void openFinalize(bool ok, std::string const& path, openmode mode, PreOpenState const&)
             {
                 if (ok)
                 {
@@ -91,10 +91,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                     file.index.open((path + ".index").c_str(), mode);
                 }
             }
-            void close()                                        {file.data.close();file.index.close();}
-            void setstate(std::ios_base::iostate extraState)    {file.data.setstate(extraState);file.index.setstate(extraState);}
-            void clear(std::ios_base::iostate newState)         {file.data.clear(newState);file.index.clear(newState);}
-            std::ios_base::iostate rdstate() const              {return file.data.rdstate() | file.index.rdstate();}
+            void close()                                {file.data.close();file.index.close();}
+            void setstate(iostate extraState)           {file.data.setstate(extraState);file.index.setstate(extraState);}
+            void clear(iostate newState)                {file.data.clear(newState);file.index.clear(newState);}
+            iostate rdstate() const                     {return file.data.rdstate() | file.index.rdstate();}
             void read(std::string& obj)
             {
                 std::getline(file.data, obj);
@@ -124,7 +124,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         };
 
         // File System Stuff
-        FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, std::ios_base::openmode mode)
+        FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, openmode mode)
         {
             using StatusInfo = struct stat;
 
@@ -148,11 +148,11 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             }
             return DirFailedToCreate;
         }
-        bool FileSystem::isFileOpenable(std::string const& path, std::ios_base::openmode mode)
+        bool FileSystem::isFileOpenable(std::string const& path, openmode mode)
         {
             bool result = true;
-            int accessFlag = ((mode & std::ios_base::in) ? R_OK : 0)
-                           | ((mode & std::ios_base::out)? W_OK : 0);
+            int accessFlag = ((mode & in) ? R_OK : 0)
+                           | ((mode & out)? W_OK : 0);
             if (access(path.c_str(), accessFlag) != 0)
             {
                 // This is still OK if we want to open a file for writing as we will be creating it.
@@ -162,7 +162,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 //  3: The directory we want to open the file is writable by this processes.
                 //
                 //  Otherwise the file is not open-able for the mode we want.
-                result = (errno == ENOENT) && (mode & std::ios_base::out) && (access(path.substr(0, path.find_last_of('/')).c_str(), W_OK) == 0);
+                result = (errno == ENOENT) && (mode & out) && (access(path.substr(0, path.find_last_of('/')).c_str(), W_OK) == 0);
             }
             return result;
         }
@@ -170,7 +170,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
 
     template<typename S, typename T>
-    FileBase<S, T>::FileBase(std::string fileName, std::ios_base::openmode mode)
+    FileBase<S, T>::FileBase(std::string fileName, openmode mode)
         : fileOpened(false)
         , baseFileName(std::move(fileName))
         , state(failbit)
@@ -179,7 +179,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    void FileBase<S, T>::open(std::string fileName, std::ios_base::openmode mode)
+    void FileBase<S, T>::open(std::string fileName, openmode mode)
     {
         if (fileOpened)
         {
@@ -210,7 +210,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, extraState]()
         {
-            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.setstate(extraState);
         }(), ...);
     }
@@ -224,7 +224,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, newState]()
         {
-            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.clear(newState);
         }(), ...);
     }
@@ -238,7 +238,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this]()
         {
-            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.close();
             setstateLocalOnly(fileAccess.rdstate());
         }(), ...);
@@ -247,7 +247,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     // ------- Open Template Recursive --------
 
     template<typename S, typename T>
-    void FileBase<S, T>::open(std::ios_base::openmode mode)
+    void FileBase<S, T>::open(openmode mode)
     {
         if (baseFileName == "")
         {
@@ -266,7 +266,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    Impl::OpenState<T> FileBase<S, T>::doOpenTry(bool& ok, std::string&& fileName, std::ios_base::openmode mode)
+    Impl::OpenState<T> FileBase<S, T>::doOpenTry(bool& ok, std::string&& fileName, openmode mode)
     {
         Impl::OpenState<T>    result;
         if (!ok)
@@ -291,7 +291,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    void FileBase<S, T>::doOpenFinalize(bool ok, std::string&&, std::ios_base::openmode mode, Impl::OpenState<T> const& state)
+    void FileBase<S, T>::doOpenFinalize(bool ok, std::string&&, openmode mode, Impl::OpenState<T> const& state)
     {
         if (state.base == Impl::NoAction)
         {
@@ -308,11 +308,11 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    Impl::OpenMemberTuple<T> FileBase<S, T>::doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>)
+    Impl::OpenMemberTuple<T> FileBase<S, T>::doOpenMembersTry(bool& ok, openmode mode, std::index_sequence<I...>)
     {
         Impl::OpenMemberTuple<T> result = std::make_tuple([this, &ok, mode]()
         {
-            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
 
             auto result = fileAccess.openTry(ok, getMemberFilePath<I>(), mode);
             setstateLocalOnly(fileAccess.rdstate());
@@ -324,11 +324,11 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileBase<S, T>::doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>)
+    void FileBase<S, T>::doOpenMembersFinalize(bool ok, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>)
     {
         ([this, ok, mode, &state]()
         {
-            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
 
             fileAccess.openFinalize(ok, getMemberFilePath<I>(), mode, std::get<I>(state));
             setstateLocalOnly(fileAccess.rdstate());
@@ -354,7 +354,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, &data]()
         {
-            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
             auto& members       = Traits::getMembers();
             auto& pointer       = std::get<I>(members).second;
 
@@ -382,7 +382,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, &data]()
         {
-            FileAccessIndex<I>  fileAccess(std::get<I>(fileTuple));
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
             auto& members       = Traits::getMembers();
             auto& pointer       = std::get<I>(members).second;
 

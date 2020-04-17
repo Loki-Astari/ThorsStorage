@@ -11,6 +11,20 @@
 
 namespace ThorsAnvil::FileSystem::ColumnFormat
 {
+    using iostate   = std::ios_base::iostate;
+    static constexpr iostate const& goodbit   = std::ios_base::goodbit;
+    static constexpr iostate const& badbit    = std::ios_base::badbit;
+    static constexpr iostate const& failbit   = std::ios_base::failbit;
+    static constexpr iostate const& eofbit    = std::ios_base::eofbit;
+
+    using openmode = std::ios_base::openmode;
+    static constexpr openmode const& app      = std::ios_base::app;
+    static constexpr openmode const& binary   = std::ios_base::binary;
+    static constexpr openmode const& in       = std::ios_base::in;
+    static constexpr openmode const& out      = std::ios_base::out;
+    static constexpr openmode const& trunc    = std::ios_base::trunc;
+    static constexpr openmode const& ate      = std::ios_base::ate;
+
 
     /*
      * File: The class we want to define.
@@ -135,8 +149,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         struct FileSystem
         {
             enum DirResult {DirAlreadyExists, DirCreated, DirFailedToCreate};
-            static DirResult makeDirectory(std::string const& path, std::ios_base::openmode mode);
-            static bool      isFileOpenable(std::string const& path, std::ios_base::openmode mode);
+            static DirResult makeDirectory(std::string const& path, openmode mode);
+            static bool      isFileOpenable(std::string const& path, openmode mode);
         };
 
         template<typename F, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
@@ -146,12 +160,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     template<typename S, typename T>
     class FileBase
     {
-        using iostate   = std::ios_base::iostate;
-        static constexpr iostate goodbit    = std::ios_base::goodbit;
-        static constexpr iostate badbit     = std::ios_base::badbit;
-        static constexpr iostate failbit    = std::ios_base::failbit;
-        static constexpr iostate eofbit     = std::ios_base::eofbit;
-
         using Traits    = ThorsAnvil::Serialize::Traits<T>;
         using Members   = typename Traits::Members;
         using Index     = std::make_index_sequence<std::tuple_size<Members>::value>;
@@ -159,13 +167,16 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         using FileTuple = Impl::TupleFileType<S, T>;
 
         template<std::size_t I>
-        using FileIndex         = std::tuple_element_t<I, FileTuple>;
+        struct FileAccessObjectSelector
+        {
+            using FileIndex         = std::tuple_element_t<I, FileTuple>;
+            using PointerTypeIndex  = std::tuple_element_t<I, Members>;
+            using DstIndex          = Impl::GetPointerMemberType<PointerTypeIndex>;
+
+            using FileAccessObject  = Impl::FileAccessObject<FileIndex, DstIndex>;
+        };
         template<std::size_t I>
-        using PointerTypeIndex  = std::tuple_element_t<I, Members>;
-        template<std::size_t I>
-        using DstIndex          = Impl::GetPointerMemberType<PointerTypeIndex<I>>;
-        template<std::size_t I>
-        using FileAccessIndex   = Impl::FileAccessObject<FileIndex<I>, DstIndex<I>>;
+        using FileAccessObject      = typename FileAccessObjectSelector<I>::FileAccessObject;
 
         bool            fileOpened;
         std::string     baseFileName;
@@ -173,9 +184,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         iostate         state;
 
         public:
-            FileBase(std::string fileName = "", std::ios_base::openmode mode = 0);
+            FileBase(std::string fileName = "", openmode mode = 0);
 
-            void open(std::string fileName, std::ios_base::openmode mode = 0);
+            void open(std::string fileName, openmode mode = 0);
             void close();
 
             // https://en.cppreference.com/w/cpp/io/ios_base/iostate
@@ -212,15 +223,15 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void writeMembers(T const& data, std::index_sequence<I...>);
 
             template<std::size_t... I>
-            Impl::OpenMemberTuple<T> doOpenMembersTry(bool& ok, std::ios_base::openmode mode, std::index_sequence<I...>);
+            Impl::OpenMemberTuple<T> doOpenMembersTry(bool& ok, openmode mode, std::index_sequence<I...>);
 
             template<std::size_t... I>
-            void doOpenMembersFinalize(bool ok, std::ios_base::openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>);
+            void doOpenMembersFinalize(bool ok, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>);
 
             template<std::size_t... I>
             void doCloseMembers(std::index_sequence<I...>);
 
-            void open(std::ios_base::openmode mode);
+            void open(openmode mode);
             void setstateLocalOnly(iostate extraState)      {state |= extraState;}
             void clearLocalOnly(iostate newState)           {state = newState;}
 
@@ -234,18 +245,18 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
 
         public:
-            Impl::OpenState<T> doOpenTry(bool& ok, std::string&& fileName, std::ios_base::openmode mode);
-            void               doOpenFinalize(bool ok, std::string&& path, std::ios_base::openmode mode, Impl::OpenState<T> const& state);
+            Impl::OpenState<T> doOpenTry(bool& ok, std::string&& fileName, openmode mode);
+            void               doOpenFinalize(bool ok, std::string&& path, openmode mode, Impl::OpenState<T> const& state);
     };
 
     template<typename T>
     class IFile: public FileBase<std::ifstream, T>
     {
         public:
-            IFile(std::string fileName = "", std::ios_base::openmode mode = std::ios::in)
+            IFile(std::string fileName = "", openmode mode = std::ios::in)
                 : FileBase<std::ifstream, T>(std::forward<std::string>(fileName), mode)
             {}
-            void open(std::string fileName, std::ios_base::openmode mode = std::ios::in)
+            void open(std::string fileName, openmode mode = std::ios::in)
             {
                 return FileBase<std::ifstream, T>::open(std::forward<std::string>(fileName), mode);
             }
@@ -254,10 +265,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     class OFile: public FileBase<std::ofstream, T>
     {
         public:
-            OFile(std::string fileName = "", std::ios_base::openmode mode = std::ios::out)
+            OFile(std::string fileName = "", openmode mode = std::ios::out)
                 : FileBase<std::ofstream, T>(std::forward<std::string>(fileName), mode)
             {}
-            void open(std::string fileName, std::ios_base::openmode mode = std::ios::out)
+            void open(std::string fileName, openmode mode = std::ios::out)
             {
                 return FileBase<std::ofstream, T>::open(std::forward<std::string>(fileName), mode);
             }
@@ -266,10 +277,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     class File: public FileBase<std::fstream, T>
     {
         public:
-            File(std::string fileName = "", std::ios_base::openmode mode = std::ios::in | std::ios::out)
+            File(std::string fileName = "", openmode mode = std::ios::in | std::ios::out)
                 : FileBase<std::fstream, T>(std::forward<std::string>(fileName), mode)
             {}
-            void open(std::string fileName, std::ios_base::openmode mode = std::ios::in | std::ios::out)
+            void open(std::string fileName, openmode mode = std::ios::in | std::ios::out)
             {
                 return FileBase<std::fstream, T>::open(std::forward<std::string>(fileName), mode);
             }
