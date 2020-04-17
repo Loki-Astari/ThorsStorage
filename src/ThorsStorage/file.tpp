@@ -162,6 +162,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         if (fileOpened)
         {
+            setstate(failbit);
             return;
         }
         baseFileName = std::move(fileName);

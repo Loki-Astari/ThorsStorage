@@ -6,6 +6,8 @@
 
 static char const   testDataDir[]       = "runTestDir";
 
+static char const   testSecondOpenDir[] = "runTestDir/second";
+
 static char const   simpleTestDir[]     = "runTestDir/PersonData";
 static char const   simpleTestP1Dir[]   = "runTestDir/PersonData/personOne";
 static char const   simpleTestP1Name[]  = "runTestDir/PersonData/personOne/name";
