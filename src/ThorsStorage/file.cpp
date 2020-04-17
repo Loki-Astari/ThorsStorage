@@ -8,6 +8,7 @@
 #include "file.tpp"
 #include "test/Person.h"
 
+
 using ThorsAnvil::FileSystem::ColumnFormat::Impl::OpenMemberTuple;
 using ThorsAnvil::FileSystem::ColumnFormat::FileBase;
 
@@ -22,10 +23,11 @@ template void FileBase<std::ofstream, TwoPeople>::open(std::string, std::ios_bas
 template void FileBase<std::fstream,  Person>::open(std::string, std::ios_base::openmode);
 template void FileBase<std::fstream,  Person>::open(std::ios_base::openmode);
 template void FileBase<std::fstream,  Person>::close();
+template void FileBase<std::ifstream, TwoPeople>::read(TwoPeople&);
+template void FileBase<std::fstream,  TwoPeople>::read(TwoPeople&);
 template void FileBase<std::fstream,  Person>::read(Person&);
 template void FileBase<std::fstream,  Person>::write(Person const&);
 template void FileBase<std::ofstream, TwoPeople>::write(TwoPeople const&);
-template void FileBase<std::fstream,  TwoPeople>::read(TwoPeople&);
 
 template void FileBase<std::fstream,  Person>::setstateSubFiles<0, 1>(iostate, std::index_sequence<0, 1>);
 template void FileBase<std::fstream,  Person>::clearSubFiles<0, 1>(iostate, std::index_sequence<0, 1>);
