@@ -9,6 +9,7 @@ static char const   testDataDir[]       = "runTestDir";
 static char const   testSecondOpenDir[] = "runTestDir/second";
 
 static char const   simpleTestDir[]     = "runTestDir/PersonData";
+static char const   simpleTestIndex[]   = "runTestDir/PersonData/$index";
 static char const   simpleTestP1Dir[]   = "runTestDir/PersonData/personOne";
 static char const   simpleTestP1Name[]  = "runTestDir/PersonData/personOne/name";
 static char const   simpleTestP1NameI[] = "runTestDir/PersonData/personOne/name.index";
@@ -83,6 +84,9 @@ class OpenTwoPeopleTest: public TestFileClass
 
             chmod(simpleTestP2Dir, 0'777);
             remove(simpleTestP2Dir);
+
+            chmod(simpleTestIndex, 0'777);
+            remove(simpleTestIndex);
 
             chmod(simpleTestDir, 0'777);
             remove(simpleTestDir);

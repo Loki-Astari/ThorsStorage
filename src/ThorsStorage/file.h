@@ -134,6 +134,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         struct FileAccessObject;
     }
 
+    using streampos = unsigned long;
+    using streamoff = signed long;
+    using seekdir   = std::ios_base::seekdir;
+
     template<typename S, typename T>
     class FileMembers
     {
@@ -168,6 +172,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void write(T const& data)               {writeMembers(data, Index{});}
             void setstate(iostate extraState)       {setstateLocalOnly(extraState); setstateMembers(extraState, Index{});}
             void clear(iostate newState = goodbit)  {clearLocalOnly(newState);      clearMembers(newState, Index{});}
+            void seekg(streampos pos)               {seekgMembers(pos, Index{});}
+            void seekp(streampos pos)               {seekpMembers(pos, Index{});}
 
             // https://en.cppreference.com/w/cpp/io/ios_base/iostate
             bool good()                             const   {return !(state & (eofbit | badbit | failbit));}
@@ -198,6 +204,12 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             template<std::size_t... I>
             void clearMembers(iostate newState, std::index_sequence<I...>);
 
+            template<std::size_t... I>
+            void seekgMembers(streampos pos, std::index_sequence<I...>);
+
+            template<std::size_t... I>
+            void seekpMembers(streampos pos, std::index_sequence<I...>);
+
             template<std::size_t I>
             std::string getMemberFilePath(std::string const& path);
 
@@ -211,6 +223,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         bool            fileOpened;
         std::string     baseFileName;
+        std::fstream    index;
+        streampos       getPos;
+        streampos       putPos;
 
         public:
             FileBase(std::string fileName = "", openmode mode = 0);
@@ -220,6 +235,11 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
             void read(T& data);
             void write(T const& data);
+
+            streampos   tellg() {return getPos;}
+            streampos   tellp() {return putPos;}
+            void        seekg(streampos pos);
+            void        seekp(streampos pos);
 
             friend FileBase& operator>>(FileBase& file, T& data)
             {

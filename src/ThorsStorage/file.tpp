@@ -31,11 +31,13 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 file.doOpenFin(ok, std::move(path), mode, state);
             }
             void close()                                {file.close();}
+            void read(T& obj)                           {file.read(obj);}
+            void write(T const& obj) const              {file.write(obj);}
             void setstate(iostate extraState)           {file.setstate(extraState);}
             void clear(iostate newState)                {file.clear(newState);}
             iostate rdstate() const                     {return file.rdstate();}
-            void read(T& obj)                           {file.read(obj);}
-            void write(T const& obj) const              {file.write(obj);}
+            void seekg(streampos pos)                   {file.seekg(pos);}
+            void seekp(streampos pos)                   {file.seekp(pos);}
         };
 
         template<typename F, typename T>
@@ -59,11 +61,13 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 }
             }
             void close()                                {file.close();}
+            void read(T& obj)                           {file.read(reinterpret_cast<char*>(&obj), sizeof(T));}
+            void write(T const& obj) const              {file.write(reinterpret_cast<char const*>(&obj), sizeof(T));}
             void setstate(iostate extraState)           {file.setstate(extraState);}
             void clear(iostate newState)                {file.clear(newState);}
             iostate rdstate() const                     {return file.rdstate();}
-            void read(T& obj)                           {file.read(reinterpret_cast<char*>(&obj), sizeof obj);}
-            void write(T const& obj) const              {file.write(reinterpret_cast<char const*>(&obj), sizeof obj);}
+            void seekg(streampos pos)                   {file.seekg(pos * sizeof(T));}
+            void seekp(streampos pos)                   {file.seekp(pos * sizeof(T));}
         };
 
         template<typename F>
@@ -88,9 +92,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 }
             }
             void close()                                {file.data.close();file.index.close();}
-            void setstate(iostate extraState)           {file.data.setstate(extraState);file.index.setstate(extraState);}
-            void clear(iostate newState)                {file.data.clear(newState);file.index.clear(newState);}
-            iostate rdstate() const                     {return file.data.rdstate() | file.index.rdstate();}
             void read(std::string& obj)
             {
                 std::getline(file.data, obj);
@@ -98,6 +99,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
                 std::size_t index;
                 file.index.read(reinterpret_cast<char*>(&index), sizeof index);
+
+                // file.data.tellg() == index
             }
             void write(std::string const& obj)
             {
@@ -114,8 +117,43 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                     used  += (len + 1);
                 }
                 file.data << std::string_view(&*start) << "\n";
-                std::size_t index = file.data.tellp();
-                file.index.write(reinterpret_cast<char*>(&index), sizeof index);
+                streampos index = file.data.tellp();
+                file.index.write(reinterpret_cast<char*>(&index), sizeof(streampos));
+            }
+            void setstate(iostate extraState)           {file.data.setstate(extraState);file.index.setstate(extraState);}
+            void clear(iostate newState)                {file.data.clear(newState);file.index.clear(newState);}
+            iostate rdstate() const                     {return file.data.rdstate() | file.index.rdstate();}
+            void seekg(streampos pos)
+            {
+                if (pos == 0)
+                {
+                    file.index.seekg(0);
+                    file.data.seekg(0);
+                }
+                else
+                {
+                    file.index.seekg(pos * sizeof(std::size_t) - sizeof(std::size_t));
+                    streampos index;
+                    file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
+                    file.seekg(-sizeof(streampos), std::ios_base::cur);
+                    file.data.seekg(index);
+                }
+            }
+            void seekp(streampos pos)
+            {
+                if (pos == 0)
+                {
+                    file.index.seekp(0);
+                    file.data.seekp(0);
+                }
+                else
+                {
+                    file.index.seekp(pos * sizeof(std::size_t) - sizeof(std::size_t));
+                    streampos index;
+                    file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
+                    file.seekp(-sizeof(streampos), std::ios_base::cur);
+                    file.data.seekp(index);
+                }
             }
         };
     }
@@ -278,6 +316,29 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         }(), ...);
     }
 
+    // ---- seek ----
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::seekgMembers(streampos pos, std::index_sequence<I...>)
+    {
+        ([this, pos]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            fileAccess.seekg(pos);
+        }(), ...);
+    }
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::seekpMembers(streampos pos, std::index_sequence<I...>)
+    {
+        ([this, pos]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            fileAccess.seekp(pos);
+        }(), ...);
+    }
+
     // ---- Get Index Element Path Name from base ----
 
     template<typename S, typename T>
@@ -297,6 +358,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     FileBase<S, T>::FileBase(std::string fileName, openmode mode)
         : fileOpened(false)
         , baseFileName(std::move(fileName))
+        , getPos(0)
+        , putPos(0)
     {
         open(mode);
     }
@@ -342,6 +405,12 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         {
             FileMembers<S, T>::setstate(failbit);
         }
+        else
+        {
+            index.open(baseFileName + "/$index", mode);
+            getPos  = index.tellg() / sizeof(std::size_t);
+            putPos  = index.tellp() / sizeof(std::size_t);
+        }
     }
 
     // ---- close ----
@@ -368,6 +437,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             return;
         }
         FileMembers<S, T>::read(data);
+        std::size_t id;
+        index.read(reinterpret_cast<char*>(&id), sizeof(std::size_t));
+        ++getPos;
     }
 
     template<typename S, typename T>
@@ -378,8 +450,25 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             return;
         }
         FileMembers<S, T>::write(data);
+        std::size_t id;
+        index.write(reinterpret_cast<char*>(&id), sizeof(std::size_t));
+        ++putPos;
     }
 
+    // ---- tell/seek ----
+    template<typename S, typename T>
+    void FileBase<S, T>::seekg(streampos pos)
+    {
+        index.seekg(pos * sizeof(std::size_t));
+        FileMembers<S, T>::seekg(pos);
+    }
+
+    template<typename S, typename T>
+    void FileBase<S, T>::seekp(streampos pos)
+    {
+        index.seekp(pos * sizeof(std::size_t));
+        FileMembers<S, T>::seekp(pos);
+    }
 }
 
 #endif
