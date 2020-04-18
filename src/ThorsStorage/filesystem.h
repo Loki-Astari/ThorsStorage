@@ -29,6 +29,7 @@ namespace ThorsAnvil::FileSystem
         enum DirResult {DirAlreadyExists, DirCreated, DirFailedToCreate};
         static DirResult makeDirectory(std::string const& path, openmode mode);
         static bool      isFileOpenable(std::string const& path, openmode mode);
+        static bool      removeFileOrDirectory(std::string const& path);
     };
 }
 

@@ -50,3 +50,10 @@ bool FileSystem::isFileOpenable(std::string const& path, openmode mode)
     }
     return result;
 }
+
+
+bool FileSystem::removeFileOrDirectory(std::string const& path)
+{
+    int state = remove(path.c_str());
+    return state == 0;
+}

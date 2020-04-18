@@ -181,7 +181,11 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
         if (!ok && state.base == Impl::NoDir)
         {
-            remove(path.c_str());
+            FileSystem::removeFileOrDirectory(path);
+            // We should probably log something if we fail to remove the directory.
+            // I don't think an exception is appropriate at this point we have already failed
+            // to create the file if this is the issue then we don't want to create in appropriate errors and a few
+            // extra directories in the file system is not going to hurt
         }
     }
 
