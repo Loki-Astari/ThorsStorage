@@ -120,12 +120,139 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         };
     }
 
+    // ==== FileMembers ====
+
+    template<typename S, typename T>
+    FileMembers<S, T>::FileMembers()
+        : state(failbit)
+    {}
+
+    // ---- Open ----
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    Impl::OpenMemberTuple<T> FileMembers<S, T>::doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<I...>)
+    {
+        Impl::OpenMemberTuple<T> result = std::make_tuple([this, &ok, &path, mode]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+
+            auto result = fileAccess.openTry(ok, getMemberFilePath<I>(path), mode);
+            setstateLocalOnly(fileAccess.rdstate());
+            return result;
+        }()...);
+
+        return result;
+    }
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::doOpenFinMembers(bool ok, std::string const& path, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>)
+    {
+        ([this, ok, &path, mode, &state]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+
+            fileAccess.openFinalize(ok, getMemberFilePath<I>(path), mode, std::get<I>(state));
+            setstateLocalOnly(fileAccess.rdstate());
+        }(), ...);
+    }
+
+    // ---- Close ----
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::doCloseMembers(std::index_sequence<I...>)
+    {
+        // Using fold expression and lambda.
+        ([this]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            fileAccess.close();
+            setstateLocalOnly(fileAccess.rdstate());
+        }(), ...);
+    }
+
+    // ---- Read/Write ----
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::readMembers(T& data, std::index_sequence<I...>)
+    {
+        // Using fold expression and lambda.
+        ([this, &data]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            auto& members       = Traits::getMembers();
+            auto& pointer       = std::get<I>(members).second;
+
+            fileAccess.read(data.*pointer);
+            setstateLocalOnly(fileAccess.rdstate());
+        }(), ...);
+    }
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::writeMembers(T const& data, std::index_sequence<I...>)
+    {
+        // Using fold expression and lambda.
+        ([this, &data]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            auto& members       = Traits::getMembers();
+            auto& pointer       = std::get<I>(members).second;
+
+            fileAccess.write(data.*pointer);
+            setstateLocalOnly(fileAccess.rdstate());
+        }(), ...);
+    }
+
+    // ---- Clear State Bits ----
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::clearMembers(iostate newState, std::index_sequence<I...>)
+    {
+        // Using fold expression and lambda.
+        ([this, newState]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            fileAccess.clear(newState);
+        }(), ...);
+    }
+
+    // ---- Set State Bits ----
+
+    template<typename S, typename T>
+    template<std::size_t... I>
+    void FileMembers<S, T>::setstateMembers(iostate extraState, std::index_sequence<I...>)
+    {
+        ([this, extraState]()
+        {
+            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            fileAccess.setstate(extraState);
+        }(), ...);
+    }
+
+    // ---- Get Index Element Path Name from base ----
+
+    template<typename S, typename T>
+    template<std::size_t I>
+    std::string FileMembers<S, T>::getMemberFilePath(std::string const& path)
+    {
+        std::string filePath = path;
+        filePath += "/";
+        filePath += std::get<I>(Traits::getMembers()).first;
+
+        return filePath;
+    }
+
+    // ===== FileBase =========
 
     template<typename S, typename T>
     FileBase<S, T>::FileBase(std::string fileName, openmode mode)
         : fileOpened(false)
         , baseFileName(std::move(fileName))
-        , state(failbit)
     {
         open(mode);
     }
@@ -135,7 +262,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         if (fileOpened)
         {
-            setstate(failbit);
+            FileMembers<S, T>::setstate(failbit);
             return;
         }
         baseFileName = std::move(fileName);
@@ -149,54 +276,14 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         {
             return;
         }
-        doCloseMembers(Index{});
-        setstateLocalOnly(failbit);
+        FileMembers<S, T>::doClose();
+        FileBase<S, T>::setstateLocalOnly(failbit);
         fileOpened = false;
     }
 
-    // ------- SetState Template Recursive --------
+    // ---- FileBase : Internal ----
 
-    template<typename S, typename T>
-    template<std::size_t... I>
-    void FileBase<S, T>::setstateSubFiles(iostate extraState, std::index_sequence<I...>)
-    {
-        ([this, extraState]()
-        {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
-            fileAccess.setstate(extraState);
-        }(), ...);
-    }
-
-    // ------- Clear Template Recursive --------
-
-    template<typename S, typename T>
-    template<std::size_t... I>
-    void FileBase<S, T>::clearSubFiles(iostate newState, std::index_sequence<I...>)
-    {
-        // Using fold expression and lambda.
-        ([this, newState]()
-        {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
-            fileAccess.clear(newState);
-        }(), ...);
-    }
-
-    // ------- Close Template Recursive --------
-
-    template<typename S, typename T>
-    template<std::size_t... I>
-    void FileBase<S, T>::doCloseMembers(std::index_sequence<I...>)
-    {
-        // Using fold expression and lambda.
-        ([this]()
-        {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
-            fileAccess.close();
-            setstateLocalOnly(fileAccess.rdstate());
-        }(), ...);
-    }
-
-    // ------- Open Template Recursive --------
+    // ---- Open ----
 
     template<typename S, typename T>
     void FileBase<S, T>::open(openmode mode)
@@ -206,14 +293,14 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             return;
         }
         fileOpened = true;
-        clear();
+        FileMembers<S, T>::clear();
 
         Impl::OpenState<T> state = doOpenTry(fileOpened, std::move(baseFileName), mode);
         doOpenFinalize(fileOpened, std::move(baseFileName), mode, state);
 
         if (!fileOpened)
         {
-            setstate(failbit);
+            FileMembers<S, T>::setstate(failbit);
         }
     }
 
@@ -237,20 +324,20 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             return result;
         }
         result.base = createDir == FileSystem::DirAlreadyExists ? Impl::DirExists : Impl::NoDir;
-        result.members = doOpenMembersTry(ok, mode, Index{});
+        result.members = FileMembers<S, T>::doOpenTry(ok, fileName, mode);
 
         return result;
     }
 
     template<typename S, typename T>
-    void FileBase<S, T>::doOpenFinalize(bool ok, std::string&&, openmode mode, Impl::OpenState<T> const& state)
+    void FileBase<S, T>::doOpenFinalize(bool ok, std::string&& path, openmode mode, Impl::OpenState<T> const& state)
     {
         if (state.base == Impl::NoAction)
         {
             return;
         }
 
-        doOpenMembersFinalize(ok, mode, state.members, Index{});
+        FileMembers<S, T>::doOpenFin(ok, path, mode, state.members);
 
         if (!ok && state.base == Impl::NoDir)
         {
@@ -258,102 +345,38 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         }
     }
 
-    template<typename S, typename T>
-    template<std::size_t... I>
-    Impl::OpenMemberTuple<T> FileBase<S, T>::doOpenMembersTry(bool& ok, openmode mode, std::index_sequence<I...>)
-    {
-        Impl::OpenMemberTuple<T> result = std::make_tuple([this, &ok, mode]()
-        {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
-
-            auto result = fileAccess.openTry(ok, getMemberFilePath<I>(), mode);
-            setstateLocalOnly(fileAccess.rdstate());
-            return result;
-        }()...);
-
-        return result;
-    }
+    // ---- close  ----
 
     template<typename S, typename T>
-    template<std::size_t... I>
-    void FileBase<S, T>::doOpenMembersFinalize(bool ok, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>)
+    void FileBase<S, T>::close()
     {
-        ([this, ok, mode, &state]()
+        if (!FileMembers<S, T>::good())
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
-
-            fileAccess.openFinalize(ok, getMemberFilePath<I>(), mode, std::get<I>(state));
-            setstateLocalOnly(fileAccess.rdstate());
-        }(), ...);
+            return;
+        }
+        FileMembers<S, T>::close();
     }
 
-    // ------- Read Template Recursive --------
+    // ---- read/write ----
 
     template<typename S, typename T>
     void FileBase<S, T>::read(T& data)
     {
-        if (!good())
+        if (!FileMembers<S, T>::good())
         {
             return;
         }
-        readMembers(data, Index{});
+        FileMembers<S, T>::read(data);
     }
-
-    template<typename S, typename T>
-    template<std::size_t... I>
-    void FileBase<S, T>::readMembers(T& data, std::index_sequence<I...>)
-    {
-        // Using fold expression and lambda.
-        ([this, &data]()
-        {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
-            auto& members       = Traits::getMembers();
-            auto& pointer       = std::get<I>(members).second;
-
-            fileAccess.read(data.*pointer);
-            setstateLocalOnly(fileAccess.rdstate());
-        }(), ...);
-    }
-
-    // ------- Write Template Recursive --------
 
     template<typename S, typename T>
     void FileBase<S, T>::write(T const& data)
     {
-        if (!good())
+        if (!FileMembers<S, T>::good())
         {
             return;
         }
-        writeMembers(data, Index{});
-    }
-
-    template<typename S, typename T>
-    template<std::size_t... I>
-    void FileBase<S, T>::writeMembers(T const& data, std::index_sequence<I...>)
-    {
-        // Using fold expression and lambda.
-        ([this, &data]()
-        {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
-            auto& members       = Traits::getMembers();
-            auto& pointer       = std::get<I>(members).second;
-
-            fileAccess.write(data.*pointer);
-            setstateLocalOnly(fileAccess.rdstate());
-        }(), ...);
-    }
-
-    // Get dependant file path
-
-    template<typename S, typename T>
-    template<std::size_t I>
-    std::string FileBase<S, T>::getMemberFilePath()
-    {
-        std::string filePath = baseFileName;
-        filePath += "/";
-        filePath += std::get<I>(Traits::getMembers()).first;
-
-        return filePath;
+        FileMembers<S, T>::write(data);
     }
 
 }

@@ -11,6 +11,7 @@
 
 using ThorsAnvil::FileSystem::ColumnFormat::Impl::OpenMemberTuple;
 using ThorsAnvil::FileSystem::ColumnFormat::FileBase;
+using ThorsAnvil::FileSystem::ColumnFormat::FileMembers;
 
 template FileBase<std::fstream,  TwoPeople>::FileBase(std::string, openmode);
 template FileBase<std::ifstream, TwoPeople>::FileBase(std::string, openmode);
@@ -32,15 +33,15 @@ template void FileBase<std::fstream,  Person>::read(Person&);
 template void FileBase<std::fstream,  Person>::write(Person const&);
 template void FileBase<std::ofstream, TwoPeople>::write(TwoPeople const&);
 
-template void FileBase<std::fstream,  Person>::setstateSubFiles<0, 1>(iostate, std::index_sequence<0, 1>);
-template void FileBase<std::fstream,  Person>::clearSubFiles<0, 1>(iostate, std::index_sequence<0, 1>);
-template void FileBase<std::fstream,  Person>::doCloseMembers<0, 1>(std::index_sequence<0, 1>);
-template OpenMemberTuple<Person> FileBase<std::fstream, Person>::doOpenMembersTry(bool& ok, openmode mode, std::index_sequence<0, 1>);
-template void FileBase<std::fstream,  Person>::doOpenMembersFinalize(bool ok, openmode mode, OpenMemberTuple<Person> const& state, std::index_sequence<0, 1>);
-template void FileBase<std::fstream,  Person>::writeMembers<0, 1>(Person const&, std::index_sequence<0, 1>);
-template void FileBase<std::fstream,  Person>::readMembers<0, 1>(Person&, std::index_sequence<0, 1>);
+template void FileMembers<std::fstream,  Person>::setstateMembers<0, 1>(iostate, std::index_sequence<0, 1>);
+template void FileMembers<std::fstream,  Person>::clearMembers<0, 1>(iostate, std::index_sequence<0, 1>);
+template void FileMembers<std::fstream,  Person>::doCloseMembers<0, 1>(std::index_sequence<0, 1>);
+template OpenMemberTuple<Person> FileMembers<std::fstream, Person>::doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<0, 1>);
+template void FileMembers<std::fstream,  Person>::doOpenFinMembers(bool ok, std::string const& path, openmode mode, OpenMemberTuple<Person> const& state, std::index_sequence<0, 1>);
+template void FileMembers<std::fstream,  Person>::writeMembers<0, 1>(Person const&, std::index_sequence<0, 1>);
+template void FileMembers<std::fstream,  Person>::readMembers<0, 1>(Person&, std::index_sequence<0, 1>);
 
-template std::string FileBase<std::fstream, Person>::getMemberFilePath<0>();
-template std::string FileBase<std::fstream, Person>::getMemberFilePath<1>();
+template std::string FileMembers<std::fstream, Person>::getMemberFilePath<0>(std::string const& path);
+template std::string FileMembers<std::fstream, Person>::getMemberFilePath<1>(std::string const& path);
 
 #endif

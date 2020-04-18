@@ -135,7 +135,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    class FileBase
+    class FileMembers
     {
         using Traits    = ThorsAnvil::Serialize::Traits<T>;
         using Members   = typename Traits::Members;
@@ -155,16 +155,19 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         template<std::size_t I>
         using FileAccessObject      = typename FileAccessObjectSelector<I>::FileAccessObject;
 
-        bool            fileOpened;
-        std::string     baseFileName;
         FileTuple       fileTuple;
         iostate         state;
 
         public:
-            FileBase(std::string fileName = "", openmode mode = 0);
+             FileMembers();
 
-            void open(std::string fileName, openmode mode = 0);
-            void close();
+            Impl::OpenMemberTuple<T> doOpenTry(bool& ok, std::string const& path, openmode mode)                     {return doOpenTryMembers(ok, path, mode, Index{});}
+            void doOpenFin(bool ok, std::string const& path, openmode mode, Impl::OpenMemberTuple<T> const& state)   {doOpenFinMembers(ok, path,  mode, state, Index{});}
+            void doClose()                          {doCloseMembers(Index{});}
+            void read(T& data)                      {readMembers(data, Index{});}
+            void write(T const& data)               {writeMembers(data, Index{});}
+            void setstate(iostate extraState)       {setstateLocalOnly(extraState); setstateMembers(extraState, Index{});}
+            void clear(iostate newState = goodbit)  {clearLocalOnly(newState);      clearMembers(newState, Index{});}
 
             // https://en.cppreference.com/w/cpp/io/ios_base/iostate
             bool good()                             const   {return !(state & (eofbit | badbit | failbit));}
@@ -173,11 +176,47 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             bool fail()                             const   {return state & (failbit | badbit);}
             operator bool()                         const   {return !fail();}
             bool operator!()                        const   {return !static_cast<bool>(*this);}
-
-
             iostate rdstate()                       const   {return state;}
-            void setstate(iostate extraState)               {setstateLocalOnly(extraState);setstateSubFiles(extraState, Index{});}
-            void clear(iostate newState = goodbit)          {clearLocalOnly(newState);clearSubFiles(newState, Index{});}
+        private:
+            template<std::size_t... I>
+            Impl::OpenMemberTuple<T> doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<I...>);
+            template<std::size_t... I>
+            void doOpenFinMembers(bool ok, std::string const& path, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>);
+
+            template<std::size_t... I>
+            void doCloseMembers(std::index_sequence<I...>);
+
+            template<std::size_t... I>
+            void readMembers(T& data, std::index_sequence<I...>);
+
+            template<std::size_t... I>
+            void writeMembers(T const& data, std::index_sequence<I...>);
+
+            template<std::size_t... I>
+            void setstateMembers(iostate extraState, std::index_sequence<I...>);
+
+            template<std::size_t... I>
+            void clearMembers(iostate newState, std::index_sequence<I...>);
+
+            template<std::size_t I>
+            std::string getMemberFilePath(std::string const& path);
+
+        protected:
+            void setstateLocalOnly(iostate extraState)      {state |= extraState;}
+            void clearLocalOnly(iostate newState)           {state = newState;}
+    };
+
+    template<typename S, typename T>
+    class FileBase: public FileMembers<S, T>
+    {
+        bool            fileOpened;
+        std::string     baseFileName;
+
+        public:
+            FileBase(std::string fileName = "", openmode mode = 0);
+
+            void open(std::string fileName, openmode mode = 0);
+            void close();
 
             void read(T& data);
             void write(T const& data);
@@ -193,33 +232,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 return file;
             }
         private:
-            template<std::size_t... I>
-            void readMembers(T& data, std::index_sequence<I...>);
-
-            template<std::size_t... I>
-            void writeMembers(T const& data, std::index_sequence<I...>);
-
-            template<std::size_t... I>
-            Impl::OpenMemberTuple<T> doOpenMembersTry(bool& ok, openmode mode, std::index_sequence<I...>);
-
-            template<std::size_t... I>
-            void doOpenMembersFinalize(bool ok, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>);
-
-            template<std::size_t... I>
-            void doCloseMembers(std::index_sequence<I...>);
-
             void open(openmode mode);
-            void setstateLocalOnly(iostate extraState)      {state |= extraState;}
-            void clearLocalOnly(iostate newState)           {state = newState;}
-
-            template<std::size_t... I>
-            void setstateSubFiles(iostate extraState, std::index_sequence<I...>);
-            template<std::size_t... I>
-            void clearSubFiles(iostate newState, std::index_sequence<I...>);
-
-            template<std::size_t I>
-            std::string getMemberFilePath();
-
 
         public:
             Impl::OpenState<T> doOpenTry(bool& ok, std::string&& fileName, openmode mode);
