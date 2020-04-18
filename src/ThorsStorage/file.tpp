@@ -408,8 +408,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         else
         {
             index.open(baseFileName + "/$index", mode);
-            getPos  = index.tellg() / sizeof(std::size_t);
-            putPos  = index.tellp() / sizeof(std::size_t);
+            getPos  = index.tellg();
+            putPos  = index.tellp();
         }
     }
 
@@ -437,8 +437,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             return;
         }
         FileMembers<S, T>::read(data);
-        std::size_t id;
-        index.read(reinterpret_cast<char*>(&id), sizeof(std::size_t));
+        char mark;
+        index.read(&mark, 1);
         ++getPos;
     }
 
@@ -450,8 +450,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             return;
         }
         FileMembers<S, T>::write(data);
-        std::size_t id;
-        index.write(reinterpret_cast<char*>(&id), sizeof(std::size_t));
+        char mark = 'A';
+        index.write(&mark, 1);
         ++putPos;
     }
 
@@ -459,15 +459,31 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     template<typename S, typename T>
     void FileBase<S, T>::seekg(streampos pos)
     {
-        index.seekg(pos * sizeof(std::size_t));
+        index.seekg(pos);
         FileMembers<S, T>::seekg(pos);
+        getPos  = pos;
     }
 
     template<typename S, typename T>
     void FileBase<S, T>::seekp(streampos pos)
     {
-        index.seekp(pos * sizeof(std::size_t));
+        index.seekp(pos);
         FileMembers<S, T>::seekp(pos);
+        putPos = pos;
+    }
+    template<typename S, typename T>
+    void FileBase<S, T>::seekg(streamoff off, seekdir dir)
+    {
+        index.seekg(off, dir);
+        streampos pos = index.tellg();
+        seekg(pos);
+    }
+    template<typename S, typename T>
+    void FileBase<S, T>::seekp(streamoff off, seekdir dir)
+    {
+        index.seekp(off, dir);
+        streampos pos = index.tellp();
+        seekp(pos);
     }
 }
 

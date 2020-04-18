@@ -240,6 +240,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             streampos   tellp() {return putPos;}
             void        seekg(streampos pos);
             void        seekp(streampos pos);
+            void        seekg(streamoff off, seekdir dir);
+            void        seekp(streamoff off, seekdir dir);
 
             friend FileBase& operator>>(FileBase& file, T& data)
             {
