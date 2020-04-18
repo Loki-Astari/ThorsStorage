@@ -16,7 +16,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
      *       Forward declaration so it can be used in FileTypeSelector.
      */
     template<typename S, typename T>
-    class FileBase;
+    class FileMembers;
 
     namespace Impl
     {
@@ -36,7 +36,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         /*
          * FileTypeSelector:    Use template specialization to define the stream class used.
          *                      For basic objects this is `std::fstream`
-         *                      For Json::Map types use a FileBase<T> types as this will recursively contain
+         *                      For Json::Map types use a FileMembers<S, T> types as this will recursively contain
          *                      File<M> or `std::fstream` types.
          */
         template<typename S, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
@@ -61,7 +61,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         template<typename S, typename T>
         struct FileTypeSelector<S, T, ThorsAnvil::Serialize::TraitType::Map>
         {
-            using FileType  = FileBase<S, T>;
+            using FileType  = FileMembers<S, T>;
         };
 
         template<typename S, typename T>
@@ -83,7 +83,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         using TupleFileType = typename TupleFileTypeBuilder<S, T>::TupleFileType;
 
         /*
-         * OpenStateSelector:   Select if we use PreOpenState (for std::fstream) or a struct (for FileBase)
+         * OpenStateSelector:   Select if we use PreOpenState (for std::fstream) or a struct (for FileMembers)
          */
         enum PreOpenState {NoAction, NoDir, DirExists};
 
@@ -161,9 +161,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         public:
              FileMembers();
 
-            Impl::OpenMemberTuple<T> doOpenTry(bool& ok, std::string const& path, openmode mode)                     {return doOpenTryMembers(ok, path, mode, Index{});}
-            void doOpenFin(bool ok, std::string const& path, openmode mode, Impl::OpenMemberTuple<T> const& state)   {doOpenFinMembers(ok, path,  mode, state, Index{});}
-            void doClose()                          {doCloseMembers(Index{});}
+            Impl::OpenState<T> doOpenTry(bool& ok, std::string const& path, openmode mode);
+            void doOpenFin(bool ok, std::string const& path, openmode mode, Impl::OpenState<T> const& state);
+            void close()                            {doCloseMembers(Index{});}
             void read(T& data)                      {readMembers(data, Index{});}
             void write(T const& data)               {writeMembers(data, Index{});}
             void setstate(iostate extraState)       {setstateLocalOnly(extraState); setstateMembers(extraState, Index{});}
@@ -233,10 +233,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             }
         private:
             void open(openmode mode);
-
-        public:
-            Impl::OpenState<T> doOpenTry(bool& ok, std::string&& fileName, openmode mode);
-            void               doOpenFinalize(bool ok, std::string&& path, openmode mode, Impl::OpenState<T> const& state);
     };
 
     template<typename T>

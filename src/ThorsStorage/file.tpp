@@ -28,14 +28,14 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             }
             void openFinalize(bool ok, std::string&& path, openmode mode, OpenState<T> const& state)
             {
-                file.doOpenFinalize(ok, std::move(path), mode, state);
+                file.doOpenFin(ok, std::move(path), mode, state);
             }
             void close()                                {file.close();}
             void setstate(iostate extraState)           {file.setstate(extraState);}
             void clear(iostate newState)                {file.clear(newState);}
             iostate rdstate() const                     {return file.rdstate();}
-            void read(T& obj)                           {file >> obj;}
-            void write(T const& obj) const              {file << obj;}
+            void read(T& obj)                           {file.read(obj);}
+            void write(T const& obj) const              {file.write(obj);}
         };
 
         template<typename F, typename T>
@@ -130,6 +130,30 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     // ---- Open ----
 
     template<typename S, typename T>
+    Impl::OpenState<T> FileMembers<S, T>::doOpenTry(bool& ok, std::string const& path, openmode mode)
+    {
+        Impl::OpenState<T>  result;
+        if (!ok)
+        {
+            result.base = Impl::NoAction;
+            return result;
+        }
+
+        FileSystem::DirResult createDir = FileSystem::makeDirectory(path, 0'777);
+
+        if (createDir == FileSystem::DirFailedToCreate)
+        {
+            ok          = false;
+            result.base = Impl::NoAction;
+            return result;
+        }
+
+        result.base = createDir == FileSystem::DirAlreadyExists ? Impl::DirExists : Impl::NoDir;
+        result.members = doOpenTryMembers(ok, path, mode, Index{});
+        return result;
+    }
+
+    template<typename S, typename T>
     template<std::size_t... I>
     Impl::OpenMemberTuple<T> FileMembers<S, T>::doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<I...>)
     {
@@ -143,6 +167,22 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         }()...);
 
         return result;
+    }
+
+    template<typename S, typename T>
+    void FileMembers<S, T>::doOpenFin(bool ok, std::string const& path, openmode mode, Impl::OpenState<T> const& state)
+    {
+        if (state.base == Impl::NoAction)
+        {
+            return;
+        }
+
+        doOpenFinMembers(ok, path,  mode, state.members, Index{});
+
+        if (!ok && state.base == Impl::NoDir)
+        {
+            remove(path.c_str());
+        }
     }
 
     template<typename S, typename T>
@@ -257,6 +297,18 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         open(mode);
     }
 
+    // ---- Open ----
+    // Open is complex:
+    //  Only the first function here is public.
+    //  The second is the main entry point called by the public open and the constructor.
+    //  It performs the open in two two stages:
+    //      Stage 1:    doOpenTry:
+    //                      Create Directory if they don't exist.
+    //                      Check if required files can be opened in the required mode in a directory.
+    //      Stage 2:    doOpenFin:
+    //                      If all files can be created then create all files.
+    //                      If we can not create all the files then remove the directories we created in stage 1.
+
     template<typename S, typename T>
     void FileBase<S, T>::open(std::string fileName, openmode mode)
     {
@@ -270,22 +322,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    void FileBase<S, T>::close()
-    {
-        if (!fileOpened)
-        {
-            return;
-        }
-        FileMembers<S, T>::doClose();
-        FileBase<S, T>::setstateLocalOnly(failbit);
-        fileOpened = false;
-    }
-
-    // ---- FileBase : Internal ----
-
-    // ---- Open ----
-
-    template<typename S, typename T>
     void FileBase<S, T>::open(openmode mode)
     {
         if (baseFileName == "")
@@ -295,8 +331,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         fileOpened = true;
         FileMembers<S, T>::clear();
 
-        Impl::OpenState<T> state = doOpenTry(fileOpened, std::move(baseFileName), mode);
-        doOpenFinalize(fileOpened, std::move(baseFileName), mode, state);
+        Impl::OpenState<T> state = FileMembers<S, T>::doOpenTry(fileOpened, baseFileName, mode);
+        FileMembers<S, T>::doOpenFin(fileOpened, baseFileName, mode, state);
 
         if (!fileOpened)
         {
@@ -304,57 +340,18 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         }
     }
 
-    template<typename S, typename T>
-    Impl::OpenState<T> FileBase<S, T>::doOpenTry(bool& ok, std::string&& fileName, openmode mode)
-    {
-        Impl::OpenState<T>    result;
-        if (!ok)
-        {
-            result.base = Impl::NoAction;
-            return result;
-        }
-
-        baseFileName = fileName;
-        FileSystem::DirResult createDir = FileSystem::makeDirectory(baseFileName, 0'777);
-
-        if (createDir == FileSystem::DirFailedToCreate)
-        {
-            ok          = false;
-            result.base = Impl::NoAction;
-            return result;
-        }
-        result.base = createDir == FileSystem::DirAlreadyExists ? Impl::DirExists : Impl::NoDir;
-        result.members = FileMembers<S, T>::doOpenTry(ok, fileName, mode);
-
-        return result;
-    }
-
-    template<typename S, typename T>
-    void FileBase<S, T>::doOpenFinalize(bool ok, std::string&& path, openmode mode, Impl::OpenState<T> const& state)
-    {
-        if (state.base == Impl::NoAction)
-        {
-            return;
-        }
-
-        FileMembers<S, T>::doOpenFin(ok, path, mode, state.members);
-
-        if (!ok && state.base == Impl::NoDir)
-        {
-            remove(baseFileName.c_str());
-        }
-    }
-
-    // ---- close  ----
+    // ---- close ----
 
     template<typename S, typename T>
     void FileBase<S, T>::close()
     {
-        if (!FileMembers<S, T>::good())
+        if (!fileOpened)
         {
             return;
         }
         FileMembers<S, T>::close();
+        FileBase<S, T>::setstateLocalOnly(failbit);
+        fileOpened = false;
     }
 
     // ---- read/write ----
