@@ -4,10 +4,6 @@
 #include "file.h"
 #include <iostream>
 #include <string_view>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <stdio.h>
 
 namespace ThorsAnvil::FileSystem::ColumnFormat
 {
@@ -122,50 +118,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 file.index.write(reinterpret_cast<char*>(&index), sizeof index);
             }
         };
-
-        // File System Stuff
-        FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, openmode mode)
-        {
-            using StatusInfo = struct stat;
-
-            StatusInfo        info;
-            for (std::size_t pos = path.find('/'); pos != std::string::npos; pos = path.find(pos + 1, '/'))
-            {
-                std::string     subPath = path.substr(0, pos);
-                if ((stat(subPath.c_str(), &info) != 0) && (mkdir(subPath.c_str(), mode) != 0))
-                {
-                    return DirFailedToCreate;
-                }
-            }
-            if (stat(path.c_str(), &info) == 0)
-            {
-                return DirAlreadyExists;
-            }
-
-            if (mkdir(path.c_str(), mode) == 0)
-            {
-                return DirCreated;
-            }
-            return DirFailedToCreate;
-        }
-        bool FileSystem::isFileOpenable(std::string const& path, openmode mode)
-        {
-            bool result = true;
-            int accessFlag = ((mode & in) ? R_OK : 0)
-                           | ((mode & out)? W_OK : 0);
-            if (access(path.c_str(), accessFlag) != 0)
-            {
-                // This is still OK if we want to open a file for writing as we will be creating it.
-                // But to make sure we have permission we have to check three things.
-                //  1: The errors for accesses is because the file does not exist.
-                //  2: We want to open the file for writing.
-                //  3: The directory we want to open the file is writable by this processes.
-                //
-                //  Otherwise the file is not open-able for the mode we want.
-                result = (errno == ENOENT) && (mode & out) && (access(path.substr(0, path.find_last_of('/')).c_str(), W_OK) == 0);
-            }
-            return result;
-        }
     }
 
 
@@ -276,15 +228,15 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         }
 
         baseFileName = fileName;
-        Impl::FileSystem::DirResult createDir = Impl::FileSystem::makeDirectory(baseFileName, 0'777);
+        FileSystem::DirResult createDir = FileSystem::makeDirectory(baseFileName, 0'777);
 
-        if (createDir == Impl::FileSystem::DirFailedToCreate)
+        if (createDir == FileSystem::DirFailedToCreate)
         {
             ok          = false;
             result.base = Impl::NoAction;
             return result;
         }
-        result.base = createDir == Impl::FileSystem::DirAlreadyExists ? Impl::DirExists : Impl::NoDir;
+        result.base = createDir == FileSystem::DirAlreadyExists ? Impl::DirExists : Impl::NoDir;
         result.members = doOpenMembersTry(ok, mode, Index{});
 
         return result;
