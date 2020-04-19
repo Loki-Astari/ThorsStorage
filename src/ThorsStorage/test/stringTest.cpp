@@ -18,7 +18,6 @@ TEST_F(StringTest, WriteMultoLineString)
     }
 
     std::string     line;
-    int             number;
 
     std::ifstream   p1nameFile(simpleTestP1Name);
     std::getline(p1nameFile, line);
