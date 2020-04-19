@@ -7,18 +7,33 @@
 
 namespace ThorsAnvil::FileSystem::ColumnFormat
 {
-
     namespace Impl
     {
-        // Open/Read/Write an item from a file.
-        // This could be a std::fstream/std::ifstream/std::ofstream or IFile or OFile or IOFile
-        //      Basic types (Value) as they are fixed size.
-        //      std::string:        Also a value type but not fixed size.
+        /*
+         * FileAccessObjectType:        Given a type T knows how to access the underlying File for the type.
+         *                              Note the file type will be defined in file.h by Impl::FileType
+         *
+         *                              Note we use the template type F to represent the type as FileType is specialized
+         *                              by S (the stream) which could be (std::ifstream, std::ofstream, std::stream).
+         *
+         * But there are three basic versions:
+         *                      Given a type T The type of file we will use to store it.
+         *                      A: If T is a POD type this is type S (which will be one std::ifstream, std::ofstream, std::fstream)
+         *                              For most operations we simply pass on the call,
+         *                      B: If T is a std::string this type is a struct with S being used to hold data and std::fstream used to hold an index into the strings.
+         *                              For most operations we simply pass on the call.
+         *                              For writes we add an additional write for the index to the start of the next line.
+         *                              seekp() and seekg() read the index files before seeking in the data file.
+         *                      C: If T is an object mapped by ThorsAnvil_MakeTrait (see ThorsSerializer) then File<S, T>.
+         *                              For most operations we simply pass on the call,
+         */
+         
+        // Default versions handles case C: the File type is File<S, T>
         template<typename F, typename T, ThorsAnvil::Serialize::TraitType type>
-        struct FileAccessObject
+        struct FileAccessObjectType
         {
             F&  file;
-            FileAccessObject(F& file)
+            FileAccessObjectType(F& file)
                 : file(file)
             {}
 
@@ -40,11 +55,12 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void seekp(streampos pos)                   {file.seekp(pos);}
         };
 
+        // This specialization for Value types handles all POD types and F is a standrard library strean
         template<typename F, typename T>
-        struct FileAccessObject<F, T, ThorsAnvil::Serialize::TraitType::Value>
+        struct FileAccessObjectType<F, T, ThorsAnvil::Serialize::TraitType::Value>
         {
             F&  file;
-            FileAccessObject(F& file)
+            FileAccessObjectType(F& file)
                 : file(file)
             {}
 
@@ -70,11 +86,12 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             void seekp(streampos pos)                   {file.seekp(pos * sizeof(T));}
         };
 
+        // This specialization for std::string keeps track of the data and an index into the data.
         template<typename F>
-        struct FileAccessObject<F, std::string, ThorsAnvil::Serialize::TraitType::Value>
+        struct FileAccessObjectType<F, std::string, ThorsAnvil::Serialize::TraitType::Value>
         {
             F&  file;
-            FileAccessObject(F& file)
+            FileAccessObjectType(F& file)
                 : file(file)
             {}
 
@@ -157,6 +174,24 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 }
             }
         };
+
+        template<typename S, typename T, std::size_t I>
+        struct FileAccessObjectSelector
+        {
+            using Traits            = ThorsAnvil::Serialize::Traits<T>;
+            using Members           = typename Traits::Members;
+            using FileTuple         = TupleFileType<S, T>;
+
+            using FileIndex         = std::tuple_element_t<I, FileTuple>;
+            using PointerTypeIndex  = std::tuple_element_t<I, Members>;
+            using DstIndex          = GetPointerMemberType<PointerTypeIndex>;
+
+            using FileAccessObject  = FileAccessObjectType<FileIndex, DstIndex>;
+        };
+        // Given an S, T and an index I.
+        template<typename S, typename T, std::size_t I>
+        using FileAccessObject      = typename FileAccessObjectSelector<S, T, I>::FileAccessObject;
+
     }
 
     // ==== FileMembers ====
@@ -168,6 +203,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     // ---- Open ----
 
+    // void FileBase<S, T>::open for a description of the open processes.
     template<typename S, typename T>
     Impl::OpenState<T> FileMembers<S, T>::doOpenTry(bool& ok, std::string const& path, openmode mode)
     {
@@ -198,7 +234,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         Impl::OpenMemberTuple<T> result = std::make_tuple([this, &ok, &path, mode]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
 
             auto result = fileAccess.openTry(ok, getMemberFilePath<I>(path), mode);
             setstateLocalOnly(fileAccess.rdstate());
@@ -234,7 +270,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, ok, &path, mode, &state]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
 
             fileAccess.openFinalize(ok, getMemberFilePath<I>(path), mode, std::get<I>(state));
             setstateLocalOnly(fileAccess.rdstate());
@@ -250,7 +286,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.close();
             setstateLocalOnly(fileAccess.rdstate());
         }(), ...);
@@ -265,7 +301,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, &data]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
             auto& members       = Traits::getMembers();
             auto& pointer       = std::get<I>(members).second;
 
@@ -281,7 +317,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, &data]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
             auto& members       = Traits::getMembers();
             auto& pointer       = std::get<I>(members).second;
 
@@ -299,7 +335,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         // Using fold expression and lambda.
         ([this, newState]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.clear(newState);
         }(), ...);
     }
@@ -312,7 +348,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, extraState]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.setstate(extraState);
         }(), ...);
     }
@@ -324,7 +360,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, pos]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.seekg(pos);
         }(), ...);
     }
@@ -335,7 +371,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     {
         ([this, pos]()
         {
-            FileAccessObject<I>  fileAccess(std::get<I>(fileTuple));
+            Impl::FileAccessObject<S, T, I>  fileAccess(std::get<I>(fileTuple));
             fileAccess.seekp(pos);
         }(), ...);
     }

@@ -12,14 +12,55 @@
 namespace ThorsAnvil::FileSystem::ColumnFormat
 {
     /*
-     * File: The class we want to define.
-     *       Forward declaration so it can be used in FileTypeSelector.
+     * This header defines two main types.
+     * FileBase and FileMembers
+     *
+     * The FileMembers class holds a tuple of all subfiles and mainly deals with distributing any call on the class to all submembers.
+     * Just to prove all rules have exceptions, the FileMembers class also holds a state member that is the binary or of all the other
+     * subfiles state flags. This makes checking the overall state of the object simler.
+     *
+     * The FileBase class acts as the logical File object.
+     * It contains any buisness logic associated with a file (including its primary name).
+     *
+     * The user variants of FileBase are:
+     *      IFile:      Input File
+     *      OFile:      Output File
+     *      File:       Can be either in or out or in/out just need to be specific in the open flag.
      */
+     
+    // Need to forward declare FileMembers as it is used in the Implementation details section.
     template<typename S, typename T>
     class FileMembers;
 
     namespace Impl
     {
+        /*
+         * This section contains some utility class to help in building types (there is no code here)
+         * NamingConvention:
+         *      XXXSelector:    A class partial specialization that helps select a type for XXX based on input type T.
+         *      XXXBuilder:     A class partial specialization that builds a tuple type XXX based on input type Arg...
+         *
+         * Normally Selector and builder are used together to build a tuple of types.
+         *
+         * GetPointerMember:    Given a pointer to a member (Type). Returns the value being pointed at.
+         * FileType:            Given a type T The type of file we will use to store it.
+         *                      A: If T is a POD type this is type S (which will be one std::ifstream, std::ofstream, std::fstream)
+         *                      B: If T is a std::string this type is a struct with S being used to hold data and std::fstream used to hold an index into the strings.
+         *                         This is so given a position we can quickly seek to a position in the file where the string is held.
+         *                      C: If T is an object mapped by ThorsAnvil_MakeTrait (see ThorsSerializer) then File<S, T>.
+         *                         Thus we map a structure to multiple files one file for each members. If a member is another structure
+         *                         this becomes a subdirectory with each of its memebrs mapped to a file in this subdirectory.
+         * TupleFileType:       Given a class T; This becomes a std::tuple<FileType...> one member of the tuple for each member of the class.
+         *
+         * PreOpenState:        When opening a file we do a pre-scan to decide if any file will fail to open.
+         *                      We track the state of how we are doing with this type so we can tidy up if we decide the open will fail.
+         * OpenState:           Given a type T the type is used to store state for an attempted opening.
+         *                      A: If T is POD or std::string then PreOpenState
+         *                      B: If T is an object mapped by ThorsAnvil_MakeTrait (see ThorsSerializer) then std::tuple<OpenState...>
+         * OpenStateTuple:      Given a class T; this becomes a std::tuple<OpenState...> one member of the tuple for each member of the class.
+         * OpenMemberTuple:     A Utility to help.
+         */
+
         // Get the type being pointed at by a pointer to member variable.
         template<typename P>
         struct GetPointerMember;
@@ -130,8 +171,9 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         template<typename T>
         using OpenMemberTuple = typename OpenState<T>::OpenMemberTuple;
 
+        // Forward declaration of FileAccessObjectType See file.tpp for details.
         template<typename F, typename T, ThorsAnvil::Serialize::TraitType type = ThorsAnvil::Serialize::Traits<T>::type>
-        struct FileAccessObject;
+        struct FileAccessObjectType;
     }
 
     using streampos = unsigned long;
@@ -146,18 +188,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         using Index     = std::make_index_sequence<std::tuple_size<Members>::value>;
 
         using FileTuple = Impl::TupleFileType<S, T>;
-
-        template<std::size_t I>
-        struct FileAccessObjectSelector
-        {
-            using FileIndex         = std::tuple_element_t<I, FileTuple>;
-            using PointerTypeIndex  = std::tuple_element_t<I, Members>;
-            using DstIndex          = Impl::GetPointerMemberType<PointerTypeIndex>;
-
-            using FileAccessObject  = Impl::FileAccessObject<FileIndex, DstIndex>;
-        };
-        template<std::size_t I>
-        using FileAccessObject      = typename FileAccessObjectSelector<I>::FileAccessObject;
 
         FileTuple       fileTuple;
         iostate         state;
