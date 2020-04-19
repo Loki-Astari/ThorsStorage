@@ -1,6 +1,6 @@
 THORSANVIL_ROOT             = $(realpath ../../)
 
-TARGET                      = ThorsStorage.head
+TARGET                      = ThorsStorage.slib
 
 FILE_WARNING_FLAGS          += -Wno-unknown-pragmas
 
