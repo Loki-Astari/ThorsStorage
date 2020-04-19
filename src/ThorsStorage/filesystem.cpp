@@ -1,3 +1,4 @@
+#include "ThorsStorageConfig.h"
 #include "filesystem.h"
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -7,6 +8,7 @@
 using namespace ThorsAnvil::FileSystem;
 
 // File System Stuff
+HEADER_ONLY_INCLUDE
 FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, openmode mode)
 {
     using StatusInfo = struct stat;
@@ -32,6 +34,7 @@ FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, openmod
     return DirFailedToCreate;
 }
 
+HEADER_ONLY_INCLUDE
 bool FileSystem::isFileOpenable(std::string const& path, openmode mode)
 {
     bool result = true;
@@ -49,4 +52,11 @@ bool FileSystem::isFileOpenable(std::string const& path, openmode mode)
         result = (errno == ENOENT) && (mode & out) && (access(path.substr(0, path.find_last_of('/')).c_str(), W_OK) == 0);
     }
     return result;
+}
+
+HEADER_ONLY_INCLUDE
+bool FileSystem::removeFileOrDirectory(std::string const& path)
+{
+    int state = remove(path.c_str());
+    return state == 0;
 }
