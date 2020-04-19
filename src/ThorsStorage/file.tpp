@@ -87,20 +87,22 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             {
                 if (ok)
                 {
-                    file.data.open(path.c_str(), mode);
-                    file.index.open((path + ".index").c_str(), mode);
+                    file.data.open(path, mode);
+                    {
+                        std::ofstream touch(path + ".index", std::ios::app);
+                    }
+                    file.index.open(path + ".index", mode | std::ios_base::in | std::ios_base::out);
                 }
             }
-            void close()                                {file.data.close();file.index.close();}
+            void close()
+            {
+                file.data.close();
+                file.index.close();
+            }
             void read(std::string& obj)
             {
                 std::getline(file.data, obj);
                 std::transform(std::begin(obj), std::end(obj), std::begin(obj), [](char x){return x == '\0' ? '\n' : x;});
-
-                std::size_t index;
-                file.index.read(reinterpret_cast<char*>(&index), sizeof index);
-
-                // file.data.tellg() == index
             }
             void write(std::string const& obj)
             {
@@ -135,7 +137,6 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                     file.index.seekg(pos * sizeof(std::size_t) - sizeof(std::size_t));
                     streampos index;
                     file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
-                    file.seekg(-sizeof(streampos), std::ios_base::cur);
                     file.data.seekg(index);
                 }
             }
@@ -148,10 +149,10 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
                 }
                 else
                 {
-                    file.index.seekp(pos * sizeof(std::size_t) - sizeof(std::size_t));
+                    file.index.seekg(pos * sizeof(std::size_t) - sizeof(std::size_t));
                     streampos index;
                     file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
-                    file.seekp(-sizeof(streampos), std::ios_base::cur);
+                    file.index.seekp(pos * sizeof(std::size_t) - sizeof(std::size_t));
                     file.data.seekp(index);
                 }
             }

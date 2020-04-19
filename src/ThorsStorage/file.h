@@ -53,8 +53,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
         {
             using FileType  = struct FileTypeStruct
             {
-                S   data;
-                S   index;
+                S               data;
+                std::fstream    index;
             };
         };
 
