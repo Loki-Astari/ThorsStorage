@@ -1,3 +1,4 @@
+#include "ThorsStorageConfig.h"
 #include "file.h"
 
 #ifdef COVERAGE_TEST

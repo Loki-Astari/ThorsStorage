@@ -27,7 +27,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
          *                      C: If T is an object mapped by ThorsAnvil_MakeTrait (see ThorsSerializer) then File<S, T>.
          *                              For most operations we simply pass on the call,
          */
-         
+
         // Default versions handles case C: the File type is File<S, T>
         template<typename F, typename T, ThorsAnvil::Serialize::TraitType type>
         struct FileAccessObjectType
@@ -197,7 +197,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     // ==== FileMembers ====
 
     template<typename S, typename T>
-    FileMembers<S, T>::FileMembers()
+    inline FileMembers<S, T>::FileMembers()
         : state(failbit)
     {}
 
@@ -205,7 +205,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     // void FileBase<S, T>::open for a description of the open processes.
     template<typename S, typename T>
-    Impl::OpenState<T> FileMembers<S, T>::doOpenTry(bool& ok, std::string const& path, openmode mode)
+    inline Impl::OpenState<T> FileMembers<S, T>::doOpenTry(bool& ok, std::string const& path, openmode mode)
     {
         Impl::OpenState<T>  result;
         if (!ok)
@@ -230,7 +230,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    Impl::OpenMemberTuple<T> FileMembers<S, T>::doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<I...>)
+    inline Impl::OpenMemberTuple<T> FileMembers<S, T>::doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<I...>)
     {
         Impl::OpenMemberTuple<T> result = std::make_tuple([this, &ok, &path, mode]()
         {
@@ -245,7 +245,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    void FileMembers<S, T>::doOpenFin(bool ok, std::string const& path, openmode mode, Impl::OpenState<T> const& state)
+    inline void FileMembers<S, T>::doOpenFin(bool ok, std::string const& path, openmode mode, Impl::OpenState<T> const& state)
     {
         if (state.base == Impl::NoAction)
         {
@@ -266,7 +266,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::doOpenFinMembers(bool ok, std::string const& path, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>)
+    inline void FileMembers<S, T>::doOpenFinMembers(bool ok, std::string const& path, openmode mode, Impl::OpenMemberTuple<T> const& state, std::index_sequence<I...>)
     {
         ([this, ok, &path, mode, &state]()
         {
@@ -281,7 +281,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::doCloseMembers(std::index_sequence<I...>)
+    inline void FileMembers<S, T>::doCloseMembers(std::index_sequence<I...>)
     {
         // Using fold expression and lambda.
         ([this]()
@@ -296,7 +296,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::readMembers(T& data, std::index_sequence<I...>)
+    inline void FileMembers<S, T>::readMembers(T& data, std::index_sequence<I...>)
     {
         // Using fold expression and lambda.
         ([this, &data]()
@@ -312,7 +312,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::writeMembers(T const& data, std::index_sequence<I...>)
+    inline void FileMembers<S, T>::writeMembers(T const& data, std::index_sequence<I...>)
     {
         // Using fold expression and lambda.
         ([this, &data]()
@@ -330,7 +330,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::clearMembers(iostate newState, std::index_sequence<I...>)
+    inline void FileMembers<S, T>::clearMembers(iostate newState, std::index_sequence<I...>)
     {
         // Using fold expression and lambda.
         ([this, newState]()
@@ -344,7 +344,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::setstateMembers(iostate extraState, std::index_sequence<I...>)
+    inline void FileMembers<S, T>::setstateMembers(iostate extraState, std::index_sequence<I...>)
     {
         ([this, extraState]()
         {
@@ -356,7 +356,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     // ---- seek ----
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::seekgMembers(streampos pos, std::index_sequence<I...>)
+    inline void FileMembers<S, T>::seekgMembers(streampos pos, std::index_sequence<I...>)
     {
         ([this, pos]()
         {
@@ -367,7 +367,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t... I>
-    void FileMembers<S, T>::seekpMembers(streampos pos, std::index_sequence<I...>)
+    inline void FileMembers<S, T>::seekpMembers(streampos pos, std::index_sequence<I...>)
     {
         ([this, pos]()
         {
@@ -380,7 +380,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     template<typename S, typename T>
     template<std::size_t I>
-    std::string FileMembers<S, T>::getMemberFilePath(std::string const& path)
+    inline std::string FileMembers<S, T>::getMemberFilePath(std::string const& path)
     {
         std::string filePath = path;
         filePath += "/";
@@ -392,7 +392,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     // ===== FileBase =========
 
     template<typename S, typename T>
-    FileBase<S, T>::FileBase(std::string fileName, openmode mode)
+    inline FileBase<S, T>::FileBase(std::string fileName, openmode mode)
         : fileOpened(false)
         , baseFileName(std::move(fileName))
         , getPos(0)
@@ -414,7 +414,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     //                      If we can not create all the files then remove the directories we created in stage 1.
 
     template<typename S, typename T>
-    void FileBase<S, T>::open(std::string fileName, openmode mode)
+    inline void FileBase<S, T>::open(std::string fileName, openmode mode)
     {
         if (fileOpened)
         {
@@ -426,7 +426,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    void FileBase<S, T>::open(openmode mode)
+    inline void FileBase<S, T>::open(openmode mode)
     {
         if (baseFileName == "")
         {
@@ -453,7 +453,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     // ---- close ----
 
     template<typename S, typename T>
-    void FileBase<S, T>::close()
+    inline void FileBase<S, T>::close()
     {
         if (!fileOpened)
         {
@@ -467,7 +467,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     // ---- read/write ----
 
     template<typename S, typename T>
-    void FileBase<S, T>::read(T& data)
+    inline void FileBase<S, T>::read(T& data)
     {
         if (!FileMembers<S, T>::good())
         {
@@ -480,7 +480,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    void FileBase<S, T>::write(T const& data)
+    inline void FileBase<S, T>::write(T const& data)
     {
         if (!FileMembers<S, T>::good())
         {
@@ -494,7 +494,7 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
 
     // ---- tell/seek ----
     template<typename S, typename T>
-    void FileBase<S, T>::seekg(streampos pos)
+    inline void FileBase<S, T>::seekg(streampos pos)
     {
         index.seekg(pos);
         FileMembers<S, T>::seekg(pos);
@@ -502,21 +502,21 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
     }
 
     template<typename S, typename T>
-    void FileBase<S, T>::seekp(streampos pos)
+    inline void FileBase<S, T>::seekp(streampos pos)
     {
         index.seekp(pos);
         FileMembers<S, T>::seekp(pos);
         putPos = pos;
     }
     template<typename S, typename T>
-    void FileBase<S, T>::seekg(streamoff off, seekdir dir)
+    inline void FileBase<S, T>::seekg(streamoff off, seekdir dir)
     {
         index.seekg(off, dir);
         streampos pos = index.tellg();
         seekg(pos);
     }
     template<typename S, typename T>
-    void FileBase<S, T>::seekp(streamoff off, seekdir dir)
+    inline void FileBase<S, T>::seekp(streamoff off, seekdir dir)
     {
         index.seekp(off, dir);
         streampos pos = index.tellp();

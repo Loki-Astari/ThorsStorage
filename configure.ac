@@ -11,7 +11,7 @@ AC_CONFIG_AUX_DIR([build/autotools/build])
 AX_THOR_FUNC_BUILD
 
 
-AC_CONFIG_SRCDIR([src/ThorsStorage/ThorsStorage.cpp])
+AC_CONFIG_SRCDIR([src/ThorsStorage/file.cpp])
 
 # Find the C++ Copiler
 # The minimumm requirements.
@@ -34,6 +34,8 @@ LT_INIT
 
 
 
+AC_DEFINE([HEADER_ONLY], [0], [Enable to use header only libraries])
+AC_DEFINE([HEADER_ONLY_INCLUDE], [], [For header only convery to inline])
 # Build all the Makefiles and configuration files.
 # Used by ThorMaker
 # Note: you can push the config file to sub directories in the AC_CONFIG_HEADERS macro (see example)

@@ -595,7 +595,7 @@ PACKAGE_STRING='ThorsStorage 0.1'
 PACKAGE_BUGREPORT='YourName@Email.com'
 PACKAGE_URL=''
 
-ac_unique_file="src/ThorsStorage/ThorsStorage.cpp"
+ac_unique_file="src/ThorsStorage/file.cpp"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -16983,6 +16983,12 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 # Note there are some predefined macros in build/autotools/m4/
 
 
+
+
+$as_echo "#define HEADER_ONLY 0" >>confdefs.h
+
+
+$as_echo "#define HEADER_ONLY_INCLUDE /**/" >>confdefs.h
 
 # Build all the Makefiles and configuration files.
 # Used by ThorMaker
