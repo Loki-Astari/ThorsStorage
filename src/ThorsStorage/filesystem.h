@@ -1,6 +1,8 @@
 #ifndef THORSANVIL_FILESYSTEM_FILESYSTEM_H
 #define THORSANVIL_FILESYSTEM_FILESYSTEM_H
 
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <string>
 #include <fstream>
 
@@ -27,7 +29,7 @@ namespace ThorsAnvil::FileSystem
     struct FileSystem
     {
         enum DirResult {DirAlreadyExists, DirCreated, DirFailedToCreate};
-        static DirResult makeDirectory(std::string const& path, openmode mode);
+        static DirResult makeDirectory(std::string const& path, mode_t permissions);
         static bool      isFileOpenable(std::string const& path, openmode mode);
         static bool      removeFileOrDirectory(std::string const& path);
     };
