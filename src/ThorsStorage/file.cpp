@@ -37,15 +37,15 @@ template void FileBase<std::ofstream, TwoPeople>::seekp(streamoff, seekdir);
 template void FileBase<std::ifstream, TwoPeople>::seekg(streampos);
 template void FileBase<std::ifstream, TwoPeople>::seekg(streamoff, seekdir);
 
-template void FileMembers<std::fstream,  Person>::setstateMembers<0, 1>(iostate, std::index_sequence<0, 1>);
-template void FileMembers<std::fstream,  Person>::clearMembers<0, 1>(iostate, std::index_sequence<0, 1>);
-template void FileMembers<std::fstream,  Person>::doCloseMembers<0, 1>(std::index_sequence<0, 1>);
-template OpenMemberTuple<Person> FileMembers<std::fstream, Person>::doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<0, 1>);
-template void FileMembers<std::fstream,  Person>::doOpenFinMembers(bool ok, std::string const& path, openmode mode, OpenMemberTuple<Person> const& state, std::index_sequence<0, 1>);
-template void FileMembers<std::fstream,  Person>::writeMembers<0, 1>(Person const&, std::index_sequence<0, 1>);
-template void FileMembers<std::fstream,  Person>::readMembers<0, 1>(Person&, std::index_sequence<0, 1>);
-template void FileMembers<std::ifstream, TwoPeople>::setstateMembers<0, 1>(unsigned int, std::index_sequence<0, 1>);
-template void FileMembers<std::ofstream, TwoPeople>::setstateMembers<0, 1>(unsigned int, std::index_sequence<0, 1>);
+template void FileMembers<std::fstream,  Person>::setstateMembers<0UL, 1UL>(iostate, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::fstream,  Person>::clearMembers<0UL, 1UL>(iostate, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::fstream,  Person>::doCloseMembers<0UL, 1UL>(std::index_sequence<0UL, 1UL>);
+template OpenMemberTuple<Person> FileMembers<std::fstream, Person>::doOpenTryMembers(bool& ok, std::string const& path, openmode mode, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::fstream,  Person>::doOpenFinMembers(bool ok, std::string const& path, openmode mode, OpenMemberTuple<Person> const& state, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::fstream,  Person>::writeMembers<0UL, 1UL>(Person const&, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::fstream,  Person>::readMembers<0UL, 1UL>(Person&, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::ifstream, TwoPeople>::setstateMembers<0UL, 1UL>(unsigned int, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::ofstream, TwoPeople>::setstateMembers<0UL, 1UL>(unsigned int, std::index_sequence<0UL, 1UL>);
 
 
 template std::string FileMembers<std::fstream, Person>::getMemberFilePath<0>(std::string const& path);
