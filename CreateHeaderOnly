@@ -12,7 +12,7 @@ git clone --single-branch --branch header-only https://Loki-Astari:${TMP}@github
 rm /tmp/TS/ThorsStorage/*
 cp build/include/ThorsStorage/*  /tmp/TS/ThorsStorage/
 cd /tmp/TS
-git checkout ThorsStorage/SerializeConfig.h
+git checkout ThorsStorage/ThorsStorageConfig.h
 
 git add ThorsStorage/*
 git commit -m "Update the header only build to latest version"
