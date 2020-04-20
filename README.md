@@ -29,12 +29,25 @@ ThorsAnvil_MakeTrait(Person, name, age, salary, team);
 
 int main()
 {
-    CF::File<Person>    saveFile("data");
-    saveFile << Person{"Loki", 33, 12345, Team{12,34}};
-    saveFile << Person{"Tom",  25, 34566, Team{13,34}};
-    saveFile << Person{"Luke", 45, 43125, Team{14,34}};
-    saveFile << Person{"John", 32, 43895, Team{15,34}};
-    saveFile << Person{"Pete", 18, 43111, Team{16,34}};
+    {
+        CF::OFile<Person>    saveFile("data");
+        saveFile << Person{"Loki", 33, 12345, Team{12,34}};
+        saveFile << Person{"Tom",  25, 34566, Team{13,34}};
+        saveFile << Person{"Luke", 45, 43125, Team{14,34}};
+        saveFile << Person{"John", 32, 43895, Team{15,34}};
+        saveFile << Person{"Pete", 18, 43111, Team{16,34}};
+    }
+    CF::IFile<Person>    loadFile("data");
+    Person   p;
+    
+    
+    loadFile.seekg(2);
+    loadFile >> p; // Should load Luke (as this is record 2 (zero based)
+    
+    loadFile.seekg(4);
+    loadFile >> p; // Should load Pete (as this is record 4 (zero based)
+
+    
 }
 ````
 
