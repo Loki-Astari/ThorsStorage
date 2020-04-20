@@ -2,6 +2,8 @@ git:
     submodules: false
 language: cpp
 before_install:
+    - touch tmp.cpp; g++ --version tmp.cpp
+    - g++ --help -v -v -v | grep std
     - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
     - sudo apt-get update
 install:
