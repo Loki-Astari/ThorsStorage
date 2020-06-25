@@ -6,7 +6,7 @@
 
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using ReadTest = OpenTwoPeopleTest;
+using ReadTest = SimpleTestDir;
 
 TEST_F(ReadTest, readTwoPeople)
 {

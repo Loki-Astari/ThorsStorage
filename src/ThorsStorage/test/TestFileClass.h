@@ -3,37 +3,27 @@
 
 #include "gtest/gtest.h"
 #include <stdexcept>
+#include <fcntl.h>
 
-static char const   testDataDir[]       = "runTestDir";
+using namespace std::string_literals;
 
-static char const   testSecondOpenDir[] = "runTestDir/second";
+static std::string const   testDataDir       = "runTestDir"s;
 
-static char const   simpleTestDir[]     = "runTestDir/PersonData";
-static char const   simpleTestIndex[]   = "runTestDir/PersonData/$index";
-static char const   simpleTestP1Dir[]   = "runTestDir/PersonData/personOne";
-static char const   simpleTestP1Name[]  = "runTestDir/PersonData/personOne/name";
-static char const   simpleTestP1NameI[] = "runTestDir/PersonData/personOne/name.index";
-static char const   simpleTestP1Age[]   = "runTestDir/PersonData/personOne/age";
-static char const   simpleTestP2Dir[]   = "runTestDir/PersonData/personTwo";
-static char const   simpleTestP2Name[]  = "runTestDir/PersonData/personTwo/name";
-static char const   simpleTestP2NameI[] = "runTestDir/PersonData/personTwo/name.index";
-static char const   simpleTestP2Age[]   = "runTestDir/PersonData/personTwo/age";
+static std::string const   testSecondOpenDir = "runTestDir/second"s;
 
-static char const   lockedTestDir[]     = "runTestDir/lockedDir";
-static char const   lockedTestP1Dir[]   = "runTestDir/lockedDir/personOne";
-static char const   lockedTestP1Name[]  = "runTestDir/lockedDir/personOne/name";
-static char const   lockedTestP1Age[]   = "runTestDir/lockedDir/personOne/age";
-static char const   lockedTestP2Dir[]   = "runTestDir/lockedDir/personTwo";
-static char const   lockedTestP2Name[]  = "runTestDir/lockedDir/personTwo/name";
-static char const   lockedTestP2Age[]   = "runTestDir/lockedDir/personTwo/age";
+static std::string const   simpleIndex   = "/$index"s;
+static std::string const   simpleP1Dir   = "/personOne"s;
+static std::string const   simpleP1Name  = "/personOne/name"s;
+static std::string const   simpleP1NameI = "/personOne/name.index"s;
+static std::string const   simpleP1Age   = "/personOne/age"s;
+static std::string const   simpleP2Dir   = "/personTwo"s;
+static std::string const   simpleP2Name  = "/personTwo/name"s;
+static std::string const   simpleP2NameI = "/personTwo/name.index"s;
+static std::string const   simpleP2Age   = "/personTwo/age"s;
 
-static char const   lockedFileDir[]     = "runTestDir/openDir";
-static char const   lockedFileP1Dir[]   = "runTestDir/openDir/personOne";
-static char const   lockedFileP1Name[]  = "runTestDir/openDir/personOne/name";
-static char const   lockedFileP1Age[]   = "runTestDir/openDir/personOne/age";
-static char const   lockedFileP2Dir[]   = "runTestDir/openDir/personTwo";
-static char const   lockedFileP2Name[]  = "runTestDir/openDir/personTwo/name";
-static char const   lockedFileP2Age[]   = "runTestDir/openDir/personTwo/age";
+static std::string const   simpleTestDir = "runTestDir/PersonData"s;
+static std::string const   lockedTestDir = "runTestDir/lockedDir"s;
+static std::string const   lockedFileDir = "runTestDir/openDir"s;
 
 // The fixture for testing class Foo.
 class TestFileClass: public ::testing::Test
@@ -41,55 +31,92 @@ class TestFileClass: public ::testing::Test
     public:
         TestFileClass()
         {
-            int checkPreCondition = access(testDataDir, F_OK);
+            int checkPreCondition = access(testDataDir.c_str(), F_OK);
             if (checkPreCondition == 0)
             {
                 // Run Time Test Directory exists.
                 // A previous test has failed to clean up correctly.
                 throw std::runtime_error("Test Directory Detected: It should not be there");
             }
-            mkdir(testDataDir, 0'777);
+            mkdir(testDataDir.c_str(), 0'777);
         }
         ~TestFileClass()
         {
-            remove(testDataDir);
+            remove(testDataDir.c_str());
         }
 };
 
-class OpenTwoPeopleTest: public TestFileClass
+class TwoPeopleTest: public TestFileClass
 {
+    std::string fileNameBase;
     protected:
+        TwoPeopleTest(std::string const& fileNameBase)
+            : fileNameBase(fileNameBase)
+        {}
         void TearDown() override
         {
-            chmod(simpleTestP1Name, 0'777);
-            remove(simpleTestP1Name);
+            chmod((fileNameBase + simpleP1Name ).c_str(), 0'777);
+            chmod((fileNameBase + simpleP1NameI).c_str(), 0'777);
+            chmod((fileNameBase + simpleP1Age  ).c_str(), 0'777);
+            chmod((fileNameBase + simpleP1Dir  ).c_str(), 0'777);
 
-            chmod(simpleTestP1NameI, 0'777);
-            remove(simpleTestP1NameI);
+            chmod((fileNameBase + simpleP2Name ).c_str(), 0'777);
+            chmod((fileNameBase + simpleP2NameI).c_str(), 0'777);
+            chmod((fileNameBase + simpleP2Age  ).c_str(), 0'777);
+            chmod((fileNameBase + simpleP2Dir  ).c_str(), 0'777);
 
-            chmod(simpleTestP1Age, 0'777);
-            remove(simpleTestP1Age);
+            chmod((fileNameBase + simpleIndex  ).c_str(), 0'777);
 
-            chmod(simpleTestP1Dir, 0'777);
-            remove(simpleTestP1Dir);
+            chmod((fileNameBase                ).c_str(), 0'777);
 
-            chmod(simpleTestP2Name, 0'777);
-            remove(simpleTestP2Name);
+            // --
 
-            chmod(simpleTestP2NameI, 0'777);
-            remove(simpleTestP2NameI);
+            remove((fileNameBase + simpleP1Name ).c_str());
+            remove((fileNameBase + simpleP1NameI).c_str());
+            remove((fileNameBase + simpleP1Age  ).c_str());
+            remove((fileNameBase + simpleP1Dir  ).c_str());
 
-            chmod(simpleTestP2Age, 0'777);
-            remove(simpleTestP2Age);
+            remove((fileNameBase + simpleP2Name ).c_str());
+            remove((fileNameBase + simpleP2NameI).c_str());
+            remove((fileNameBase + simpleP2Age  ).c_str());
+            remove((fileNameBase + simpleP2Dir  ).c_str());
 
-            chmod(simpleTestP2Dir, 0'777);
-            remove(simpleTestP2Dir);
+            remove((fileNameBase + simpleIndex  ).c_str());
 
-            chmod(simpleTestIndex, 0'777);
-            remove(simpleTestIndex);
+            remove((fileNameBase                ).c_str());
+        }
+};
 
-            chmod(simpleTestDir, 0'777);
-            remove(simpleTestDir);
+class SimpleTestDir: public TwoPeopleTest
+{
+    public:
+        SimpleTestDir()
+            : TwoPeopleTest(simpleTestDir)
+        {}
+};
+class LockedTestDir: public TwoPeopleTest
+{
+    public:
+        LockedTestDir()
+            : TwoPeopleTest(lockedTestDir)
+        {}
+        void SetUp() override
+        {
+            mkdir(lockedTestDir.c_str(), 0'000);
+        }
+};
+class LockedFileDir: public TwoPeopleTest
+{
+    public:
+        LockedFileDir()
+            : TwoPeopleTest(lockedFileDir)
+        {}
+        void SetUp() override
+        {
+            mkdir(lockedFileDir.c_str(), 0'777);
+            mkdir((lockedFileDir + simpleP2Dir).c_str(), 0'777);
+            int fd = open((lockedFileDir + simpleP2Name).c_str(), O_RDWR | O_CREAT, 0'000);
+            close(fd);
         }
 };
 

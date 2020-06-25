@@ -6,7 +6,7 @@
 
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using TellTest = OpenTwoPeopleTest;
+using TellTest = SimpleTestDir;
 
 TEST_F(TellTest, tellput)
 {

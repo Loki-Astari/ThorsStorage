@@ -6,7 +6,7 @@
 
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using StringTest = OpenTwoPeopleTest;
+using StringTest = SimpleTestDir;
 
 TEST_F(StringTest, WriteMultoLineString)
 {
@@ -19,7 +19,7 @@ TEST_F(StringTest, WriteMultoLineString)
 
     std::string     line;
 
-    std::ifstream   p1nameFile(simpleTestP1Name);
+    std::ifstream   p1nameFile(simpleTestDir + simpleP1Name);
     std::getline(p1nameFile, line);
     ASSERT_EQ(line, std::string("Mult-Line\000String\0001234", 21));
     ASSERT_TRUE(p1nameFile);

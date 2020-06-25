@@ -6,7 +6,7 @@
 
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using IndexTest = OpenTwoPeopleTest;
+using IndexTest = SimpleTestDir;
 
 TEST_F(IndexTest, indexFileCheck)
 {
@@ -17,7 +17,7 @@ TEST_F(IndexTest, indexFileCheck)
     }
     std::size_t     index;
 
-    std::fstream    index1(simpleTestP1NameI);
+    std::fstream    index1((simpleTestDir + simpleP1NameI).c_str());
     ASSERT_TRUE(index1);
 
     index1.read(reinterpret_cast<char*>(&index), sizeof index);
@@ -26,7 +26,7 @@ TEST_F(IndexTest, indexFileCheck)
     ASSERT_EQ(index, 7);    // Martin + '\n'
 
 
-    std::fstream    index2(simpleTestP1NameI);
+    std::fstream    index2((simpleTestDir + simpleP1NameI).c_str());
     ASSERT_TRUE(index2);
 
     index2.read(reinterpret_cast<char*>(&index), sizeof index);

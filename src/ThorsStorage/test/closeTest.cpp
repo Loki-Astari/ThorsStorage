@@ -6,7 +6,7 @@
 
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using CloseTest = OpenTwoPeopleTest;
+using CloseTest = SimpleTestDir;
 
 TEST_F(CloseTest, closeTwoPeopleFile)
 {

@@ -6,7 +6,7 @@
 
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using SeekTest = OpenTwoPeopleTest;
+using SeekTest = SimpleTestDir;
 
 TEST_F(SeekTest, seekPutAbsolute)
 {
