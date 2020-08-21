@@ -7,7 +7,7 @@ install:
     - ./.build/travis/setup ${TRAVIS_OS_NAME}
     - mkdir -p /tmp/include/ThorSerialize/ThorsIOUtil/
     - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h              > /tmp/include/ThorSerialize/Traits.h
-    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > /tmp/include/ThorSerialize/Serialize/Traits.h
+    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > /tmp/include/ThorSerialize/ThorsSerializerUtil.h
     - curl https://raw.githubusercontent.com/Loki-Astari/ThorsIOUtil/master/src/ThorsIOUtil/Utility.h               > /tmp/include/ThorSerialize/ThorsIOUtil/Utility.h
 script:
     - "./configure --with-boost=/tmp/extra --disable-binary"
