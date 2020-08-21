@@ -45,8 +45,10 @@ template void FileMembers<std::fstream,  Person>::doOpenFinMembers(bool ok, std:
 template void FileMembers<std::fstream,  Person>::writeMembers<0UL, 1UL>(Person const&, std::index_sequence<0UL, 1UL>);
 template void FileMembers<std::fstream,  Person>::readMembers<0UL, 1UL>(Person&, std::index_sequence<0UL, 1UL>);
 template void FileMembers<std::ifstream, TwoPeople>::setstateMembers<0UL, 1UL>(iostate, std::index_sequence<0UL, 1UL>);
+template void FileMembers<std::ofstream, TwoPeople>::setstateMembers<0UL, 1UL>(iostate, std::index_sequence<0UL, 1UL>);
 
 template std::string FileMembers<std::fstream, Person>::getMemberFilePath<0>(std::string const& path);
 template std::string FileMembers<std::fstream, Person>::getMemberFilePath<1>(std::string const& path);
+
 
 #endif
