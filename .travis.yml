@@ -3,11 +3,11 @@ git:
 language: cpp
 before_install:
 install:
+script:
     - ./.build/travis/presetup ${TRAVIS_OS_NAME}
     - ./.build/travis/setup ${TRAVIS_OS_NAME}
     - mkdir -p /tmp/include/ThorSerialize
     - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h > /tmp/include/ThorSerialize/Traits.h
-script:
     - "./configure --with-boost=/tmp/extra --disable-binary"
     - export PATH=${PATH}:export CXXFLAGS=-I/tmp/include/;$(pwd)/build/bin;make
 after_success:
