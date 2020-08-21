@@ -1,6 +1,0 @@
-[submodule ".build"]
-	path = .build
-	url = git@github.com:Loki-Astari/ThorMaker.git
-[submodule ".ThorMaker"]
-	path = .ThorMaker
-	url = git@github.com:Loki-Astari/ThorMaker.git
