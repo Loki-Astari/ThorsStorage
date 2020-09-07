@@ -10,6 +10,7 @@ release/
 profile/
 report/
 vera/
+dependency/
 
 makefile_tmp
 Makefile.extra
