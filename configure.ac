@@ -12,7 +12,7 @@ AC_CONFIG_AUX_DIR([build/autotools/build])
 AX_THOR_FUNC_BUILD
 
 
-AC_CONFIG_SRCDIR([src/ThorsStorage/file.cpp])
+AC_CONFIG_SRCDIR([src/ThorsStorage/file.tpp])
 
 # Find the C++ Copiler
 # The minimumm requirements.

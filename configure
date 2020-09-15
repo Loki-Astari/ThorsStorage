@@ -595,7 +595,7 @@ PACKAGE_STRING='ThorsStorage 0.1'
 PACKAGE_BUGREPORT='Loki.Astari+ThorsAnvil@gmail.com'
 PACKAGE_URL=''
 
-ac_unique_file="src/ThorsStorage/file.cpp"
+ac_unique_file="src/ThorsStorage/file.tpp"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
