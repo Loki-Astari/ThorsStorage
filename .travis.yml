@@ -6,8 +6,8 @@ before_install:
 install:
     - ./.build/travis/setup ${TRAVIS_OS_NAME}
     - mkdir -p .build/include/ThorSerialize
-    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h              > ./build/include/ThorSerialize/Traits.h
-    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > ./build/include/ThorSerialize/ThorsSerializerUtil.h
+    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h              > .build/include/ThorSerialize/Traits.h
+    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > .build/include/ThorSerialize/ThorsSerializerUtil.h
 script:
     - "./configure --with-boost=/tmp/extra --disable-binary --enable-verapython2"
     - export PATH=${PATH}:$(pwd)/build/bin;make
