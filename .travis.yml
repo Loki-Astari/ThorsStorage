@@ -5,12 +5,12 @@ before_install:
     - ./.build/travis/presetup ${TRAVIS_OS_NAME}
 install:
     - ./.build/travis/setup ${TRAVIS_OS_NAME}
-    - mkdir -p /tmp/include/ThorSerialize
-    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h              > /tmp/include/ThorSerialize/Traits.h
-    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > /tmp/include/ThorSerialize/ThorsSerializerUtil.h
+    - mkdir -p build/include/ThorSerialize
+    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h              > build/include/ThorSerialize/Traits.h
+    - curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > build/include/ThorSerialize/ThorsSerializerUtil.h
 script:
     - "./configure --with-boost=/tmp/extra --disable-binary --enable-verapython2"
-    - export PATH=${PATH}:$(pwd)/build/bin;export CXXFLAGS=-I/tmp/include/;make
+    - export PATH=${PATH}:$(pwd)/build/bin;make
 after_success:
     - bash <(curl -s https://codecov.io/bash)
 branches:
