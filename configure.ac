@@ -32,6 +32,18 @@ LT_INIT
 #
 # Add your defintions in here.
 # Note there are some predefined macros in build/autotools/m4/
+AC_CHECK_HEADER (ThorSerialize/Traits.h,
+[
+    # If this is not found you don't have a local copy of ThorsSerializer
+    # SImply download the header files we need locally.
+    # They are not needed by dependencies
+],
+[
+    mkdir -p .build/include/ThorSerialize
+    curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h              > .build/include/ThorSerialize/Traits.h
+    curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > .build/include/ThorSerialize/ThorsSerializerUtil.h
+]
+[])
 
 
 
