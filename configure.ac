@@ -35,10 +35,16 @@ LT_INIT
 
 export cwd=`pwd`
 pushd third/ThorsLogging
+pwd
+echo "./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}"
 ./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}
+echo "================ DONE ================="
 popd
 pushd third/ThorsIOUtil
+pwd
+echo "./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}"
 ./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}
+echo "================ DONE ================="
 popd
 
 
