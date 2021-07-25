@@ -11,7 +11,7 @@ install:
     - curl https://raw.githubusercontent.com/Loki-Astari/ThorsIOUtil/master/src/ThorsIOUtil/Utility.h               > /tmp/include/ThorSerialize/ThorsIOUtil/Utility.h
 script:
     - "./configure --with-boost=/tmp/extra --disable-binary --enable-verapython2"
-    - export PATH=${PATH}:export CXXFLAGS=-I/tmp/include/;$(pwd)/build/bin;make
+    - export PATH=${PATH}:$(pwd)/build/bin;export CXXFLAGS=-I/tmp/include/;make
 after_success:
     - bash <(curl -s https://codecov.io/bash)
 branches:
