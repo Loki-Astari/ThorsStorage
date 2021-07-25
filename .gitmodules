@@ -4,3 +4,6 @@
 [submodule "third/ThorsLogging"]
 	path = third/ThorsLogging
 	url = https://github.com/Loki-Astari/ThorsLogging.git
+[submodule "third/ThorsIOUtil"]
+	path = third/ThorsIOUtil
+	url = https://github.com/Loki-Astari/ThorsIOUtil.git
