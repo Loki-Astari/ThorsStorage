@@ -33,19 +33,6 @@ LT_INIT
 # Add your defintions in here.
 # Note there are some predefined macros in build/autotools/m4/
 
-export cwd=`pwd`
-pushd third/ThorsLogging
-pwd
-echo "./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}"
-./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}
-echo "================ DONE ================="
-popd
-pushd third/ThorsIOUtil
-pwd
-echo "./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}"
-./configure --prefix=${prefix} --with-hostbuild=${cwd}/build ${subconfigvera}
-echo "================ DONE ================="
-popd
 
 
 AC_DEFINE([HEADER_ONLY], [0], [Enable to use header only libraries])
