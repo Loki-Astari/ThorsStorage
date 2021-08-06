@@ -9,8 +9,12 @@
 // See: https://codereview.stackexchange.com/questions/81922/macro-to-build-type-declaration
 // For details about the Traits type and how it is built.
 
-namespace ThorsAnvil::FileSystem::ColumnFormat
+namespace ThorsAnvil
 {
+    namespace FileSystem
+    {
+        namespace ColumnFormat
+        {
     /*
      * This header defines two main types.
      * FileBase and FileMembers
@@ -324,6 +328,8 @@ namespace ThorsAnvil::FileSystem::ColumnFormat
             }
     };
 
+        }
+    }
 }
 
 #include "file.tpp"
