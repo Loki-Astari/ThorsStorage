@@ -47,6 +47,8 @@ AC_CHECK_HEADER (ThorSerialize/Traits.h,
 
 
 
+AX_THOR_CHECK_THIRD_PARTY_LIBS
+
 AC_DEFINE([HEADER_ONLY], [0], [Enable to use header only libraries])
 AC_DEFINE([HEADER_ONLY_INCLUDE], [], [For header only convery to inline])
 # Build all the Makefiles and configuration files.
