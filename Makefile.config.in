@@ -2,4 +2,6 @@
 # In this file add the variables defined with AC_SUBST
 # They can then be included by surrounding with @
 # AC_SUBST([ExampleMakeFileVariable], [ValueOfVariable])
-ExampleMakeFileVariable=@ExampleMakeFileVariable@
+
+VIRTUAL_WARNING=@INCONSISTENT_MISSING_OVERRIDE@ @DELETE_NON_VIRTUAL_DESTRUCT_GCC@ @DELETE_NON_VIRTUAL_DESTRUCT_CLANG@
+

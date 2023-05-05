@@ -709,6 +709,10 @@ am__isrc
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
+DELETE_NON_VIRTUAL_DESTRUCT_GCC
+DELETE_NON_VIRTUAL_DESTRUCT_CLANG
+INCONSISTENT_MISSING_OVERRIDE
+magic_enum_ROOT_DIR
 CXXCPP
 LT_SYS_LIBRARY_PATH
 OTOOL64
@@ -761,6 +765,7 @@ NO_UNUSED_PRIVATE_FIELD_TEST
 ac_ct_CC
 CFLAGS
 CC
+DARK_MODE
 THOR_TARGETLIBS
 VERATOOL
 TestVera
@@ -819,6 +824,7 @@ ac_user_opts='
 enable_option_checking
 enable_vera
 with_hostbuild
+enable_dark_mode
 with_standard
 enable_shared
 enable_static
@@ -828,6 +834,7 @@ with_aix_soname
 with_gnu_ld
 with_sysroot
 enable_libtool_lock
+with_magicenumroot
 enable_dependency_tracking
 enable_silent_rules
 '
@@ -1473,6 +1480,9 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-vera          Disable vera. Disable Static analysis of source.
 
+  --enable-dark-mode      If your background is black some text that was grey
+                          is turned yellow
+
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1502,6 +1512,9 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-sysroot[=DIR]    Search for dependent libraries within DIR (or the
                           compiler's sysroot if not specified).
+  --with-magicenumroot=<location>
+                          Directory of YAML_ROOT
+
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -3773,6 +3786,25 @@ then :
 
 
 fi
+
+
+    DARK_MODE=""
+    # Check whether --enable-dark-mode was given.
+if test ${enable_dark_mode+y}
+then :
+  enableval=$enable_dark_mode;
+fi
+
+    if test "x$enable_dark-mode" != "xyes"
+then :
+
+            DARK_MODE="ON"
+            subconfigure="${subconfigure} --enable-dark-mode"
+
+
+fi
+    DARK_MODE=${DARK_MODE}
+
 
 
     if test "x${with_hostbuild}" == "x"
@@ -17170,6 +17202,67 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 #
 # Add your defintions in here.
 # Note there are some predefined macros in build/autotools/m4/
+
+    magic_enum_ROOT_DIR=""
+    ORIG_CXXFLAGS="${CXXFLAGS}"
+
+# Check whether --with-magicenumroot was given.
+if test ${with_magicenumroot+y}
+then :
+  withval=$with_magicenumroot;
+fi
+
+    if test "${with_magicenumroot}" == ""; then
+        with_magicenumroot="${DefaultLinkDir}"
+    fi
+    CXXFLAGS="$CXXFLAGS -std=c++17 -I$with_magicenumroot/include"
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+    ac_fn_cxx_check_header_compile "$LINENO" "magic_enum.hpp" "ac_cv_header_magic_enum_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_magic_enum_hpp" = xyes
+then :
+
+            magic_enum_ROOT_DIR="${with_magicenumroot}"
+            subconfigure="${subconfigure} --with-magicenumroot=${with_magicenumroot}"
+
+else $as_nop
+  as_fn_error $? "${CXXFLAGS}
+
+Could not find the header file <magic-enum.hpp>.
+You can install this with
+
+    brew install magic_enum
+
+Alternately if you have manually installed magic_enum you can specify its location with
+    --with-magicenumroot=<location of magic_enum installation>
+
+        " "$LINENO" 5
+
+fi
+
+    ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+
+    CXXFLAGS="${ORIG_CXXFLAGS}"
+    magic_enum_ROOT_DIR=${magic_enum_ROOT_DIR}
+
+
+ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+CXXFLAGS="${CXXFLAGS} -std=c++17"
 ac_fn_cxx_check_header_compile "$LINENO" "" "ac_cv_header_" "$ac_includes_default"
 if test "x$ac_cv_header_" = xyes
 then :
@@ -17187,6 +17280,135 @@ fi
     curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > .build/include/ThorSerialize/ThorsSerializerUtil.h
 
 )
+as_CACHEVAR=`printf "%s\n" "ax_cv_check_cxxflags_$CXX_STD_FLAG -Werror -Wall -Wextra_-Winconsistent-missing-override" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Winconsistent-missing-override" >&5
+printf %s "checking whether C++ compiler accepts -Winconsistent-missing-override... " >&6; }
+if eval test \${$as_CACHEVAR+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS $CXX_STD_FLAG -Werror -Wall -Wextra -Winconsistent-missing-override"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+  eval "$as_CACHEVAR=yes"
+else $as_nop
+  eval "$as_CACHEVAR=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+eval ac_res=\$$as_CACHEVAR
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_CACHEVAR"\" = x"yes"
+then :
+  INCONSISTENT_MISSING_OVERRIDE=-Winconsistent-missing-override
+
+else $as_nop
+  :
+fi
+
+as_CACHEVAR=`printf "%s\n" "ax_cv_check_cxxflags_$CXX_STD_FLAG -Werror -Wall -Wextra_-Wdelete-non-abstract-non-virtual-dtor" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Wdelete-non-abstract-non-virtual-dtor" >&5
+printf %s "checking whether C++ compiler accepts -Wdelete-non-abstract-non-virtual-dtor... " >&6; }
+if eval test \${$as_CACHEVAR+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS $CXX_STD_FLAG -Werror -Wall -Wextra -Wdelete-non-abstract-non-virtual-dtor"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+  eval "$as_CACHEVAR=yes"
+else $as_nop
+  eval "$as_CACHEVAR=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+eval ac_res=\$$as_CACHEVAR
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_CACHEVAR"\" = x"yes"
+then :
+  DELETE_NON_VIRTUAL_DESTRUCT_CLANG=-Wdelete-non-abstract-non-virtual-dtor
+
+else $as_nop
+  :
+fi
+
+as_CACHEVAR=`printf "%s\n" "ax_cv_check_cxxflags_$CXX_STD_FLAG -Werror -Wall -Wextra_-Wdelete-non-virtual-dtor" | $as_tr_sh`
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -Wdelete-non-virtual-dtor" >&5
+printf %s "checking whether C++ compiler accepts -Wdelete-non-virtual-dtor... " >&6; }
+if eval test \${$as_CACHEVAR+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS $CXX_STD_FLAG -Werror -Wall -Wextra -Wdelete-non-virtual-dtor"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+  eval "$as_CACHEVAR=yes"
+else $as_nop
+  eval "$as_CACHEVAR=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+eval ac_res=\$$as_CACHEVAR
+	       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+printf "%s\n" "$ac_res" >&6; }
+if eval test \"x\$"$as_CACHEVAR"\" = x"yes"
+then :
+  DELETE_NON_VIRTUAL_DESTRUCT_GCC=-Wno-literal-suffix
+
+else $as_nop
+  :
+fi
+
+ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
 
 
 
