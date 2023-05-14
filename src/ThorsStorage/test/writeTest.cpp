@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+#include "lokigtest.h"
 
 #include "file.h"
 #include "test/Person.h"
