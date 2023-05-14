@@ -17418,7 +17418,7 @@ eval ac_res=\$$as_CACHEVAR
 printf "%s\n" "$ac_res" >&6; }
 if eval test \"x\$"$as_CACHEVAR"\" = x"yes"
 then :
-  DELETE_NON_VIRTUAL_DESTRUCT_GCC=-Wno-literal-suffix
+  DELETE_NON_VIRTUAL_DESTRUCT_GCC=-Wdelete-non-virtual-dtor
 
 else $as_nop
   :

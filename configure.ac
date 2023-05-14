@@ -49,7 +49,7 @@ AC_CHECK_HEADER (ThorSerialize/Traits.h,
 [])
 AX_CHECK_COMPILE_FLAG([-Winconsistent-missing-override], [AC_SUBST([INCONSISTENT_MISSING_OVERRIDE], [-Winconsistent-missing-override])], [], [$CXX_STD_FLAG -Werror -Wall -Wextra])
 AX_CHECK_COMPILE_FLAG([-Wdelete-non-abstract-non-virtual-dtor], [AC_SUBST([DELETE_NON_VIRTUAL_DESTRUCT_CLANG], [-Wdelete-non-abstract-non-virtual-dtor])], [], [$CXX_STD_FLAG -Werror -Wall -Wextra])
-AX_CHECK_COMPILE_FLAG([-Wdelete-non-virtual-dtor], [AC_SUBST([DELETE_NON_VIRTUAL_DESTRUCT_GCC], [-Wno-literal-suffix])], [], [$CXX_STD_FLAG -Werror -Wall -Wextra])
+AX_CHECK_COMPILE_FLAG([-Wdelete-non-virtual-dtor], [AC_SUBST([DELETE_NON_VIRTUAL_DESTRUCT_GCC], [-Wdelete-non-virtual-dtor])], [], [$CXX_STD_FLAG -Werror -Wall -Wextra])
 AC_LANG_POP([C++])
 
 
