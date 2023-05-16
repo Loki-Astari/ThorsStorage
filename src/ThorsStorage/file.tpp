@@ -109,11 +109,11 @@ namespace ThorsAnvil
             {
                 if (ok)
                 {
-                    file.data.open(path, mode);
+                    file.data.open(path, mode | std::ios_base::binary);
                     {
                         std::ofstream touch(path + ".index", std::ios::app);
                     }
-                    file.index.open(path + ".index", mode | std::ios_base::in | std::ios_base::out);
+                    file.index.open(path + ".index", mode | std::ios_base::binary | std::ios_base::in | std::ios_base::out);
                 }
             }
             void close()
@@ -140,7 +140,7 @@ namespace ThorsAnvil
                     start += (len + 1);
                     used  += (len + 1);
                 }
-                file.data << std::string_view(&*start) << "\n";
+                file.data << std::string_view(&*start, obj.size() - used) << "\n";
                 streampos index = file.data.tellp();
                 file.index.write(reinterpret_cast<char*>(&index), sizeof(streampos));
             }
@@ -156,7 +156,7 @@ namespace ThorsAnvil
                 }
                 else
                 {
-                    file.index.seekg(pos * sizeof(std::size_t) - sizeof(std::size_t));
+                    file.index.seekg(pos * sizeof(streampos) - sizeof(streampos));
                     streampos index;
                     file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
                     file.data.seekg(index);
@@ -171,10 +171,10 @@ namespace ThorsAnvil
                 }
                 else
                 {
-                    file.index.seekg(pos * sizeof(std::size_t) - sizeof(std::size_t));
+                    file.index.seekg(pos * sizeof(streampos) - sizeof(streampos));
                     streampos index;
                     file.index.read(reinterpret_cast<char*>(&index), sizeof(streampos));
-                    file.index.seekp(pos * sizeof(std::size_t) - sizeof(std::size_t));
+                    file.index.seekp(pos * sizeof(streampos) - sizeof(streampos));
                     file.data.seekp(index);
                 }
             }

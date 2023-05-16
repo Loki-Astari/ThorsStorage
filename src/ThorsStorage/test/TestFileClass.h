@@ -4,6 +4,7 @@
 #include "lokigtest.h"
 #include <stdexcept>
 #include <fcntl.h>
+#include <stdio.h>
 
 using namespace std::string_literals;
 
@@ -42,7 +43,7 @@ class TestFileClass: public ::testing::Test
         }
         ~TestFileClass()
         {
-            remove(testDataDir.c_str());
+            rmdir(testDataDir.c_str());
         }
 };
 
@@ -74,16 +75,16 @@ class TwoPeopleTest: public TestFileClass
             remove((fileNameBase + simpleP1Name ).c_str());
             remove((fileNameBase + simpleP1NameI).c_str());
             remove((fileNameBase + simpleP1Age  ).c_str());
-            remove((fileNameBase + simpleP1Dir  ).c_str());
+            rmdir((fileNameBase + simpleP1Dir  ).c_str());
 
             remove((fileNameBase + simpleP2Name ).c_str());
             remove((fileNameBase + simpleP2NameI).c_str());
             remove((fileNameBase + simpleP2Age  ).c_str());
-            remove((fileNameBase + simpleP2Dir  ).c_str());
+            rmdir((fileNameBase + simpleP2Dir  ).c_str());
 
             remove((fileNameBase + simpleIndex  ).c_str());
 
-            remove((fileNameBase                ).c_str());
+            rmdir((fileNameBase                ).c_str());
         }
 };
 
