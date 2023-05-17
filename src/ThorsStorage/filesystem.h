@@ -7,9 +7,9 @@
 #include <fstream>
 
 #ifdef __WIN32__
-#define	THOR_MKDIR(path, permission)	mkdir(path)
+#define THOR_MKDIR(path, permission)    mkdir(path)
 #else
-#define	THOR_MKDIR(path, permission)	mkdir(path, permission)
+#define THOR_MKDIR(path, permission)    mkdir(path, permission)
 #endif
 
 // See: https://codereview.stackexchange.com/questions/81922/macro-to-build-type-declaration
