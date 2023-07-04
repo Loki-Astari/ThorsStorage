@@ -1,9 +1,10 @@
+#include "ThorsStorageConfig.h"
 #include "gtest/gtest.h"
 #include "ThorsLogging/ThorsLogging.h"
 #include <iostream>
 #include <string>
 
-
+#ifndef HEADER_ONLY
 
 class LoggingEnvironment: public ::testing::Environment
 {
@@ -71,3 +72,4 @@ bool initLogging()
 
 bool logingInit = initLogging();
 
+#endif
