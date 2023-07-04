@@ -63,6 +63,6 @@ AH_BOTTOM([
 #endif
 ])
 
-AC_CONFIG_HEADERS([config.h src/ThorsStorage/ThorsStorageConfig.h:config.h.in])
+AC_CONFIG_HEADERS([config.h src/ThorsStorage/ThorsStorageConfig.h])
 AC_CONFIG_FILES([Makefile.extra Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in])
 AC_OUTPUT
