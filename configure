@@ -3828,6 +3828,14 @@ fi
 
 
 
+
+printf "%s\n" "#define HEADER_ONLY 0" >>confdefs.h
+
+
+printf "%s\n" "#define HEADER_ONLY_INCLUDE /**/" >>confdefs.h
+
+
+
     if test "x${with_hostbuild}" == "x"
 then :
 
@@ -17438,12 +17446,6 @@ fi
         popd
     fi
 
-
-
-printf "%s\n" "#define HEADER_ONLY 0" >>confdefs.h
-
-
-printf "%s\n" "#define HEADER_ONLY_INCLUDE /**/" >>confdefs.h
 
 # Build all the Makefiles and configuration files.
 # Used by ThorMaker
