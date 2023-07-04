@@ -764,6 +764,7 @@ NO_UNUSED_PRIVATE_FIELD_TEST
 ac_ct_CC
 CFLAGS
 CC
+DARK_MODE
 COLOUR_STATE
 THOR_TARGETLIBS
 VERATOOL
@@ -824,6 +825,7 @@ enable_option_checking
 enable_vera
 with_hostbuild
 enable_colour
+enable_dark_mode
 with_standard
 enable_shared
 enable_static
@@ -1479,6 +1481,9 @@ Optional Features:
   --disable-vera          Disable vera. Disable Static analysis of source.
 
   --disable-colour        Turns off text colouring in the makefile output
+
+  --enable-dark-mode      If your background is black some text that was grey
+                          is turned yellow
 
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
@@ -3790,6 +3795,12 @@ then :
   enableval=$enable_colour;
 fi
 
+    # Check whether --enable-dark-mode was given.
+if test ${enable_dark_mode+y}
+then :
+  enableval=$enable_dark_mode;
+fi
+
     if test "x$enable_colour" == "xno"
 then :
 
@@ -3798,7 +3809,17 @@ then :
 
 
 fi
+    if test "x$enable_dark-mode" != "xyes"
+then :
+
+            DARK_MODE="ON"
+            subconfigure="${subconfigure} --enable-dark-mode"
+
+
+fi
     COLOUR_STATE=${COLOUR_STATE}
+
+    DARK_MODE=${DARK_MODE}
 
 
 
