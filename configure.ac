@@ -19,6 +19,7 @@ AC_CONFIG_SRCDIR([src/ThorsStorage/file.tpp])
 AC_PROG_CXX
 AX_CHECK_COMPILE_FLAG([-ansi], [AC_SUBST([CXXFLAGS], [" -ansi"])])
 # Check what version of the C++ language is supported
+AX_THOR_FUNC_USE_MAGIC_ENUM
 AX_THOR_FUNC_LANG_FLAG(17)
 
 # Find the code coverage tool.
