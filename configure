@@ -3828,6 +3828,14 @@ fi
 
 
 
+
+printf "%s\n" "#define HEADER_ONLY 0" >>confdefs.h
+
+
+printf "%s\n" "#define HEADER_ONLY_INCLUDE /**/" >>confdefs.h
+
+
+
     if test "x${with_hostbuild}" == "x"
 then :
 
@@ -17439,12 +17447,6 @@ fi
     fi
 
 
-
-printf "%s\n" "#define HEADER_ONLY 0" >>confdefs.h
-
-
-printf "%s\n" "#define HEADER_ONLY_INCLUDE /**/" >>confdefs.h
-
 # Build all the Makefiles and configuration files.
 # Used by ThorMaker
 # Note: you can push the config file to sub directories in the AC_CONFIG_HEADERS macro (see example)
@@ -18321,6 +18323,9 @@ END
     as_fn_error $? "Your 'rm' program is bad, sorry." "$LINENO" 5
   fi
 fi
+
+
+
 
 ac_config_headers="$ac_config_headers config.h src/ThorsStorage/ThorsStorageConfig.h:config.h.in"
 

@@ -50,13 +50,19 @@ AC_CHECK_HEADER (ThorSerialize/Traits.h,
 
 AX_THOR_CHECK_THIRD_PARTY_LIBS
 
-AC_DEFINE([HEADER_ONLY], [0], [Enable to use header only libraries])
-AC_DEFINE([HEADER_ONLY_INCLUDE], [], [For header only convery to inline])
 # Build all the Makefiles and configuration files.
 # Used by ThorMaker
 # Note: you can push the config file to sub directories in the AC_CONFIG_HEADERS macro (see example)
 # Note: Local Make variables should be placed in Makefile.config.in
 AM_INIT_AUTOMAKE([foreign])
+AH_TOP([
+#ifndef  THORS_STORAGE_CONFIG_H
+#define  THORS_STORAGE_CONFIG_H
+])
+AH_BOTTOM([
+#endif
+])
+
 AC_CONFIG_HEADERS([config.h src/ThorsStorage/ThorsStorageConfig.h:config.h.in])
 AC_CONFIG_FILES([Makefile.extra Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in])
 AC_OUTPUT
