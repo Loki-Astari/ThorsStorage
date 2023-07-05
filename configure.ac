@@ -47,7 +47,7 @@ AC_CHECK_HEADER (ThorSerialize/Traits.h,
 [])
 
 
-
+AX_THOR_FIX_GIT_SYMLINKS_WINDOWS
 AX_THOR_CHECK_THIRD_PARTY_LIBS
 
 # Build all the Makefiles and configuration files.
