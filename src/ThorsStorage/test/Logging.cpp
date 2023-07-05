@@ -6,6 +6,7 @@
 
 #ifndef HEADER_ONLY
 
+#ifndef __WINNT
 class LoggingEnvironment: public ::testing::Environment
 {
     public:
@@ -72,4 +73,5 @@ bool initLogging()
 
 bool logingInit = initLogging();
 
+#endif
 #endif

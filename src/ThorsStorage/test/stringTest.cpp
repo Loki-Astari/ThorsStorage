@@ -4,6 +4,7 @@
 #include "test/Person.h"
 #include "test/TestFileClass.h"
 
+#ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using StringTest = SimpleTestDir;
@@ -42,4 +43,5 @@ TEST_F(StringTest, ReadMultoLineString)
 
     ASSERT_EQ(twoPerson.personOne.name, "Mult-Line\nString\n1234");
 }
+#endif
 
