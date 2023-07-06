@@ -16,8 +16,6 @@
 #define THOR_MKDIR(path, permissions)       mkdir(path)
 #endif
 
-
-
 namespace ThorsAnvil
 {
     namespace FileSystem
