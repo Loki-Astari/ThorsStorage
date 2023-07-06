@@ -6,13 +6,6 @@
 
 using namespace ThorsAnvil::FileSystem;
 
-#ifndef  __WINNT
-#define THOR_MKDIR(path, permissions)       mkdir(path, permissions)
-#else
-#define THOR_MKDIR(path, permissions)       mkdir(path)
-#endif
-
-
 // File System Stuff
 HEADER_ONLY_INCLUDE
 FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, mode_t permissions)

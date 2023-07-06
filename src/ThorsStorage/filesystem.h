@@ -10,6 +10,14 @@
 // See: https://codereview.stackexchange.com/questions/81922/macro-to-build-type-declaration
 // For details about the Traits type and how it is built.
 
+#ifndef  __WINNT
+#define THOR_MKDIR(path, permissions)       mkdir(path, permissions)
+#else
+#define THOR_MKDIR(path, permissions)       mkdir(path)
+#endif
+
+
+
 namespace ThorsAnvil
 {
     namespace FileSystem

@@ -2,6 +2,7 @@
 #define THORSANVIL_FILESYSTEM_COLUMNFORMAT_TEST_TESTCLASS_H
 
 #include "gtest/gtest.h"
+#include "filesystem.h"
 #include <stdexcept>
 #include <fcntl.h>
 
@@ -38,7 +39,7 @@ class TestFileClass: public ::testing::Test
                 // A previous test has failed to clean up correctly.
                 throw std::runtime_error("Test Directory Detected: It should not be there");
             }
-            mkdir(testDataDir.c_str(), 0'777);
+            THOR_MKDIR(testDataDir.c_str(), 0'777);
         }
         ~TestFileClass()
         {
@@ -102,7 +103,7 @@ class LockedTestDir: public TwoPeopleTest
         {}
         void SetUp() override
         {
-            mkdir(lockedTestDir.c_str(), 0'000);
+            THOR_MKDIR(lockedTestDir.c_str(), 0'000);
         }
 };
 class LockedFileDir: public TwoPeopleTest
@@ -113,8 +114,8 @@ class LockedFileDir: public TwoPeopleTest
         {}
         void SetUp() override
         {
-            mkdir(lockedFileDir.c_str(), 0'777);
-            mkdir((lockedFileDir + simpleP2Dir).c_str(), 0'777);
+            THOR_MKDIR(lockedFileDir.c_str(), 0'777);
+            THOR_MKDIR((lockedFileDir + simpleP2Dir).c_str(), 0'777);
             int fd = open((lockedFileDir + simpleP2Name).c_str(), O_RDWR | O_CREAT, 0'000);
             close(fd);
         }
