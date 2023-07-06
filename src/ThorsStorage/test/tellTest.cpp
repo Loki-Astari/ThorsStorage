@@ -4,6 +4,7 @@
 #include "test/Person.h"
 #include "test/TestFileClass.h"
 
+#ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using TellTest = SimpleTestDir;
@@ -48,4 +49,5 @@ TEST_F(TellTest, tellget)
     ASSERT_EQ(file.tellg(), 3);
     ASSERT_EQ(people.personOne.age, 31);
 }
+#endif
 

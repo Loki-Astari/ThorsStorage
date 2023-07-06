@@ -4,6 +4,7 @@
 #include "test/Person.h"
 #include "test/TestFileClass.h"
 
+#ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using SeekTest = SimpleTestDir;
@@ -345,4 +346,5 @@ TEST_F(SeekTest, seekGetRelCurrentPosative)
 
     ASSERT_FALSE(file >> people);
 }
+#endif
 

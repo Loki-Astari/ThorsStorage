@@ -6,17 +6,25 @@
 
 using namespace ThorsAnvil::FileSystem;
 
+#ifndef  __WINNT
+#define THOR_MKDIR(path, permissions)       mkdir(path, permissions)
+#else
+#define THOR_MKDIR(path, permissions)       mkdir(path)
+#endif
+
+
 // File System Stuff
 HEADER_ONLY_INCLUDE
 FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, mode_t permissions)
 {
+    ((void)permissions);
     using StatusInfo = struct stat;
 
     StatusInfo        info;
     for (std::size_t pos = path.find('/'); pos != std::string::npos; pos = path.find(pos + 1, '/'))
     {
         std::string     subPath = path.substr(0, pos);
-        if ((stat(subPath.c_str(), &info) != 0) && (mkdir(subPath.c_str(), permissions) != 0))
+        if ((stat(subPath.c_str(), &info) != 0) && (THOR_MKDIR(subPath.c_str(), permissions) != 0))
         {
             return DirFailedToCreate;
         }
@@ -26,7 +34,7 @@ FileSystem::DirResult FileSystem::makeDirectory(std::string const& path, mode_t 
         return DirAlreadyExists;
     }
 
-    if (mkdir(path.c_str(), permissions) == 0)
+    if (THOR_MKDIR(path.c_str(), permissions) == 0)
     {
         return DirCreated;
     }

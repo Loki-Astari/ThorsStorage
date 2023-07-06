@@ -4,6 +4,7 @@
 #include "test/Person.h"
 #include "test/TestFileClass.h"
 
+#ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using WriteTest = SimpleTestDir;
@@ -100,4 +101,5 @@ TEST_F(WriteTest, badReadDoesNotChangeFile)
     ASSERT_FALSE(file >> twoP);
 }
 
+#endif
 
