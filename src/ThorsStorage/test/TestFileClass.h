@@ -3,8 +3,6 @@
 
 #include "gtest/gtest.h"
 #include "filesystem.h"
-#include <stdexcept>
-#include <fcntl.h>
 
 using namespace std::string_literals;
 
@@ -39,11 +37,11 @@ class TestFileClass: public ::testing::Test
                 // A previous test has failed to clean up correctly.
                 throw std::runtime_error("Test Directory Detected: It should not be there");
             }
-            THOR_MKDIR(testDataDir.c_str(), 0'777);
+            std::filesystem::create_directories(testDataDir);
         }
         ~TestFileClass()
         {
-            remove(testDataDir.c_str());
+            std::filesystem::remove_all(testDataDir);
         }
 };
 
@@ -56,35 +54,25 @@ class TwoPeopleTest: public TestFileClass
         {}
         void TearDown() override
         {
-            chmod((fileNameBase + simpleP1Name ).c_str(), 0'777);
-            chmod((fileNameBase + simpleP1NameI).c_str(), 0'777);
-            chmod((fileNameBase + simpleP1Age  ).c_str(), 0'777);
-            chmod((fileNameBase + simpleP1Dir  ).c_str(), 0'777);
+            namespace FS = std::filesystem;
+            std::error_code     errorCode;
+            FS::permissions(fileNameBase + simpleP1Name, FS::perms::all, errorCode);
+            FS::permissions(fileNameBase + simpleP1NameI, FS::perms::all, errorCode);
+            FS::permissions(fileNameBase + simpleP1Age, FS::perms::all, errorCode);
+            FS::permissions(fileNameBase + simpleP1Dir, FS::perms::all, errorCode);
 
-            chmod((fileNameBase + simpleP2Name ).c_str(), 0'777);
-            chmod((fileNameBase + simpleP2NameI).c_str(), 0'777);
-            chmod((fileNameBase + simpleP2Age  ).c_str(), 0'777);
-            chmod((fileNameBase + simpleP2Dir  ).c_str(), 0'777);
+            FS::permissions(fileNameBase + simpleP2Name, FS::perms::all, errorCode);
+            FS::permissions(fileNameBase + simpleP2NameI, FS::perms::all, errorCode);
+            FS::permissions(fileNameBase + simpleP2Age, FS::perms::all, errorCode);
+            FS::permissions(fileNameBase + simpleP2Dir, FS::perms::all, errorCode);
 
-            chmod((fileNameBase + simpleIndex  ).c_str(), 0'777);
+            FS::permissions(fileNameBase + simpleIndex, FS::perms::all, errorCode);
 
-            chmod((fileNameBase                ).c_str(), 0'777);
+            FS::permissions(fileNameBase, FS::perms::all, errorCode);
 
             // --
 
-            remove((fileNameBase + simpleP1Name ).c_str());
-            remove((fileNameBase + simpleP1NameI).c_str());
-            remove((fileNameBase + simpleP1Age  ).c_str());
-            remove((fileNameBase + simpleP1Dir  ).c_str());
-
-            remove((fileNameBase + simpleP2Name ).c_str());
-            remove((fileNameBase + simpleP2NameI).c_str());
-            remove((fileNameBase + simpleP2Age  ).c_str());
-            remove((fileNameBase + simpleP2Dir  ).c_str());
-
-            remove((fileNameBase + simpleIndex  ).c_str());
-
-            remove((fileNameBase                ).c_str());
+            std::filesystem::remove_all(fileNameBase);
         }
 };
 
@@ -103,7 +91,8 @@ class LockedTestDir: public TwoPeopleTest
         {}
         void SetUp() override
         {
-            THOR_MKDIR(lockedTestDir.c_str(), 0'000);
+            std::filesystem::create_directory(lockedTestDir);
+            std::filesystem::permissions(lockedTestDir, std::filesystem::perms::none);
         }
 };
 class LockedFileDir: public TwoPeopleTest
@@ -114,10 +103,12 @@ class LockedFileDir: public TwoPeopleTest
         {}
         void SetUp() override
         {
-            THOR_MKDIR(lockedFileDir.c_str(), 0'777);
-            THOR_MKDIR((lockedFileDir + simpleP2Dir).c_str(), 0'777);
-            int fd = open((lockedFileDir + simpleP2Name).c_str(), O_RDWR | O_CREAT, 0'000);
-            close(fd);
+            std::filesystem::create_directories(lockedFileDir);
+            std::filesystem::create_directories(lockedFileDir + simpleP2Dir);
+            std::ofstream   file(lockedFileDir + simpleP2Name);
+            std::filesystem::permissions(lockedFileDir + simpleP2Name, std::filesystem::perms::none);
+            //int fd = open((lockedFileDir + simpleP2Name).c_str(), O_RDWR | O_CREAT, 0'000);
+            //close(fd);
         }
 };
 

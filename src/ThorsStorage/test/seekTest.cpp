@@ -192,7 +192,6 @@ TEST_F(SeekTest, seekGetAbsolute)
     ASSERT_EQ(people.personTwo.name, "N3.2");
 
     file.seekg(1);
-    std::cerr << "Seek: " << file.rdstate() << "\n";
 
     ASSERT_TRUE(file >> people);
     ASSERT_EQ(people.personOne.name, "N2.1");
