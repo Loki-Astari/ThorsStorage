@@ -37,11 +37,13 @@ class TestFileClass: public ::testing::Test
                 // A previous test has failed to clean up correctly.
                 throw std::runtime_error("Test Directory Detected: It should not be there");
             }
-            std::filesystem::create_directories(testDataDir);
+            namespace FS = std::filesystem;
+            FS::create_directories(testDataDir);
         }
         ~TestFileClass()
         {
-            std::filesystem::remove_all(testDataDir);
+            namespace FS = std::filesystem;
+            FS::remove_all(testDataDir);
         }
 };
 
@@ -72,7 +74,7 @@ class TwoPeopleTest: public TestFileClass
 
             // --
 
-            std::filesystem::remove_all(fileNameBase);
+            FS::remove_all(fileNameBase);
         }
 };
 
@@ -91,8 +93,9 @@ class LockedTestDir: public TwoPeopleTest
         {}
         void SetUp() override
         {
-            std::filesystem::create_directory(lockedTestDir);
-            std::filesystem::permissions(lockedTestDir, std::filesystem::perms::none);
+            namespace FS = std::filesystem;
+            FS::create_directory(lockedTestDir);
+            FS::permissions(lockedTestDir, std::filesystem::perms::none);
         }
 };
 class LockedFileDir: public TwoPeopleTest
@@ -103,12 +106,11 @@ class LockedFileDir: public TwoPeopleTest
         {}
         void SetUp() override
         {
-            std::filesystem::create_directories(lockedFileDir);
-            std::filesystem::create_directories(lockedFileDir + simpleP2Dir);
+            namespace FS = std::filesystem;
+            FS::create_directories(lockedFileDir);
+            FS::create_directories(lockedFileDir + simpleP2Dir);
             std::ofstream   file(lockedFileDir + simpleP2Name);
-            std::filesystem::permissions(lockedFileDir + simpleP2Name, std::filesystem::perms::none);
-            //int fd = open((lockedFileDir + simpleP2Name).c_str(), O_RDWR | O_CREAT, 0'000);
-            //close(fd);
+            FS::permissions(lockedFileDir + simpleP2Name, std::filesystem::perms::none);
         }
 };
 
