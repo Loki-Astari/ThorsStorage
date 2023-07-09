@@ -1,68 +1,17 @@
 AC_INIT([ThorsStorage], [0.1], [Loki.Astari+ThorsAnvil@gmail.com])
 AC_PREREQ([2.65])
 
-# Set up the build system
-if [[ ! -e build/Notes ]]; then
-    git submodule init
-    git submodule update
-fi
-ln -s .build build | echo "Build Already Setup"
 AC_CONFIG_MACRO_DIR([build/autotools/m4])
 AC_CONFIG_AUX_DIR([build/autotools/build])
-AX_THOR_FUNC_BUILD
+
+AX_THOR_FUNC_INIT_BUILD([ThorsStorage], [17], [src/ThorsStorage/file.tpp])
 
 
-AC_CONFIG_SRCDIR([src/ThorsStorage/file.tpp])
+AX_THOR_CHECK_USE_MAGIC_ENUM
+AX_THOR_CHECK_USE_THORS_SERIALIZE
 
-# Find the C++ Copiler
-# The minimumm requirements.
-AC_PROG_CXX
-AX_CHECK_COMPILE_FLAG([-ansi], [AC_SUBST([CXXFLAGS], [" -ansi"])])
-# Check what version of the C++ language is supported
-AX_THOR_FUNC_USE_MAGIC_ENUM
-AX_THOR_FUNC_LANG_FLAG(17)
-
-# Find the code coverage tool.
-# All the testing will depend on this.
-AX_THOR_PROG_COV
-
-# Add support for shared libraries.
 LT_INIT
 
+AX_THOR_FUNC_TERM_BUILD([STORAGE], [src/ThorsStorage/ThorsStorageConfig.h])
 
-#
-# Add your defintions in here.
-# Note there are some predefined macros in build/autotools/m4/
-AC_CHECK_HEADER (ThorSerialize/Traits.h,
-[
-    # If this is not found you don't have a local copy of ThorsSerializer
-    # SImply download the header files we need locally.
-    # They are not needed by dependencies
-],
-[
-    mkdir -p .build/include/ThorSerialize
-    curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/Traits.h              > .build/include/ThorSerialize/Traits.h
-    curl https://raw.githubusercontent.com/Loki-Astari/ThorsSerializer/master/src/Serialize/ThorsSerializerUtil.h > .build/include/ThorSerialize/ThorsSerializerUtil.h
-]
-[])
-
-
-AX_THOR_FIX_GIT_SYMLINKS_WINDOWS
-AX_THOR_CHECK_THIRD_PARTY_LIBS
-
-# Build all the Makefiles and configuration files.
-# Used by ThorMaker
-# Note: you can push the config file to sub directories in the AC_CONFIG_HEADERS macro (see example)
-# Note: Local Make variables should be placed in Makefile.config.in
-AM_INIT_AUTOMAKE([foreign])
-AH_TOP([
-#ifndef  THORS_STORAGE_CONFIG_H
-#define  THORS_STORAGE_CONFIG_H
-])
-AH_BOTTOM([
-#endif
-])
-
-AC_CONFIG_HEADERS([config.h src/ThorsStorage/ThorsStorageConfig.h])
-AC_CONFIG_FILES([Makefile.extra Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in])
 AC_OUTPUT

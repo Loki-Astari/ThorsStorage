@@ -3,7 +3,8 @@ THORSANVIL_ROOT             ?= $(realpath ../../)
 TARGET                      = ThorsStorage.slib
 NAMESPACE					= ThorsAnvil::FileSystem
 
-CXXFLAGS					+= -I$(magic_enum_ROOT_DIR)/include
+MAGIC_ENUM					= $(if $(magicenum_ROOT_DIR), -I$(magicenum_ROOT_DIR)/include)
+CXXFLAGS					+= $(MAGIC_ENUM)
 UNITTEST_LINK_LIBS          = ThorsLogging
 UNITTEST_LDLIBS             = -ldl
 VERA						= echo
