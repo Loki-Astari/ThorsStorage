@@ -4730,8 +4730,33 @@ fi
     ORIG_LDFLAGS="${LDFLAGS}"
     LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
 
+    echo "Building: ThorsSerializer"
+    echo "Mark:     $BUILDING_ThorsSerializer"
     echo "Checking"
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize17" >&5
+    if test "x$BUILDING_ThorsSerializer" == "x1"
+then :
+
+
+    if test "x${with_thorserializeroot}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
+
+            ThorSerialize_ROOT_DIR=${with_thorserializeroot}
+
+            subconfigure="${subconfigure} --with-thorserializeroot=${with_thorserializeroot}"
+
+
+fi
+    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsLogging"
+    ThorSerialize_ROOT_LIB="ThorSerialize ThorsLogging"
+
+
+
+else $as_nop
+
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize17" >&5
 printf %s "checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize17... " >&6; }
 if test ${ac_cv_lib_ThorSerialize17__ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv+y}
 then :
@@ -4768,26 +4793,28 @@ printf "%s\n" "$ac_cv_lib_ThorSerialize17__ZN10ThorsAnvil9Serialize10JsonParser1
 if test "x$ac_cv_lib_ThorSerialize17__ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv" = xyes
 then :
 
-            if test "x${with_thorserializeroot}" != "x"
+
+    if test "x${with_thorserializeroot}" != "x"
 then :
 
 
 printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
 
-                    ThorSerialize_ROOT_DIR=${with_thorserializeroot}
+            ThorSerialize_ROOT_DIR=${with_thorserializeroot}
 
-                    subconfigure="${subconfigure} --with-thorserializeroot=${with_thorserializeroot}"
+            subconfigure="${subconfigure} --with-thorserializeroot=${with_thorserializeroot}"
 
 
 fi
-            echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsLogging"
-            ThorSerialize_ROOT_LIB="ThorSerialize ThorsLogging"
+    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsLogging"
+    ThorSerialize_ROOT_LIB="ThorSerialize ThorsLogging"
+
 
 
 else $as_nop
 
-            echo "FAIL: Using: >${with_thorserializeroot}<"
-            as_fn_error $? "
+                    echo "FAIL: Using: >${with_thorserializeroot}<"
+                    as_fn_error $? "
 Error: Could not find libThorSerialize17
 
 You can solve this by installing Thors Serializer
@@ -4798,11 +4825,14 @@ Alternately specify install location with:
 
 
     " "$LINENO" 5
-            echo "FAIL DONE"
+                    echo "FAIL DONE"
 
 
 fi
 
+
+
+fi
     echo "Checking DONE"
 
     LDFLAGS="${ORIG_LDFLAGS}"

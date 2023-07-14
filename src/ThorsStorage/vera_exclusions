@@ -1,0 +1,9 @@
+
+#
+# Including experimental::filesystem into std
+# Known and OK.
+#
+set ruleExclusions(M002) {
+    filesystem.h
+}
+
