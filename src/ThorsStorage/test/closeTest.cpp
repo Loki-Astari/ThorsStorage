@@ -9,7 +9,7 @@ namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 using CloseTest = SimpleTestDir;
 
 #ifndef __WINNT
-TEST_F(CloseTest, closeTwoPeopleFile)
+TEST_F(closeTest, closeTwoPeopleFile)
 {
     TC::File<TwoPeople>    file(simpleTestDir, std::ios::out);
     ASSERT_TRUE(file);
@@ -27,7 +27,7 @@ TEST_F(CloseTest, closeTwoPeopleOFile)
     ASSERT_FALSE(file);
 }
 
-TEST_F(CloseTest, closeTwoPeopleIFile)
+TEST_F(closeTest, closeTwoPeopleIFile)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);

@@ -9,7 +9,7 @@ namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using ReadTest = SimpleTestDir;
 
-TEST_F(ReadTest, readTwoPeople)
+TEST_F(readTest, readTwoPeople)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -36,7 +36,7 @@ TEST_F(ReadTest, readTwoPeople)
     ASSERT_FALSE(file);
 }
 
-TEST_F(ReadTest, readNormal)
+TEST_F(readTest, readNormal)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -55,7 +55,7 @@ TEST_F(ReadTest, readNormal)
     ASSERT_FALSE(file >> twoP);
 }
 
-TEST_F(ReadTest, badReadDoesNotChangeFile)
+TEST_F(readTest, badReadDoesNotChangeFile)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);

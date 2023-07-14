@@ -7,9 +7,9 @@
 #ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using TellTest = SimpleTestDir;
+using tellTest = SimpleTestDir;
 
-TEST_F(TellTest, tellput)
+TEST_F(tellTest, tellput)
 {
     TC::OFile<TwoPeople>    file(simpleTestDir);
     ASSERT_EQ(file.tellp(), 0);
@@ -24,7 +24,7 @@ TEST_F(TellTest, tellput)
     ASSERT_EQ(file.tellp(), 3);
 }
 
-TEST_F(TellTest, tellget)
+TEST_F(tellTest, tellget)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);

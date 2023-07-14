@@ -7,9 +7,9 @@
 #ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using StringTest = SimpleTestDir;
+using stringTest = SimpleTestDir;
 
-TEST_F(StringTest, WriteMultoLineString)
+TEST_F(stringTest, WriteMultoLineString)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -26,7 +26,7 @@ TEST_F(StringTest, WriteMultoLineString)
     ASSERT_TRUE(p1nameFile);
 }
 
-TEST_F(StringTest, ReadMultoLineString)
+TEST_F(stringTest, ReadMultoLineString)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);

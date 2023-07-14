@@ -7,9 +7,9 @@
 #ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using SeekTest = SimpleTestDir;
+using seekTest = SimpleTestDir;
 
-TEST_F(SeekTest, seekPutAbsolute)
+TEST_F(seekTest, seekPutAbsolute)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -41,7 +41,7 @@ TEST_F(SeekTest, seekPutAbsolute)
     }
 }
 
-TEST_F(SeekTest, seekPutRelBeginning)
+TEST_F(seekTest, seekPutRelBeginning)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -73,7 +73,7 @@ TEST_F(SeekTest, seekPutRelBeginning)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekPutRelEnd)
+TEST_F(seekTest, seekPutRelEnd)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -105,7 +105,7 @@ TEST_F(SeekTest, seekPutRelEnd)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekPutRelCurrentNegative)
+TEST_F(seekTest, seekPutRelCurrentNegative)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -137,7 +137,7 @@ TEST_F(SeekTest, seekPutRelCurrentNegative)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekPutRelCurrentPosative)
+TEST_F(seekTest, seekPutRelCurrentPosative)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -170,7 +170,7 @@ TEST_F(SeekTest, seekPutRelCurrentPosative)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekGetAbsolute)
+TEST_F(seekTest, seekGetAbsolute)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -205,7 +205,7 @@ TEST_F(SeekTest, seekGetAbsolute)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekGetRelBeginning)
+TEST_F(seekTest, seekGetRelBeginning)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -242,7 +242,7 @@ TEST_F(SeekTest, seekGetRelBeginning)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekGetRelEnd)
+TEST_F(seekTest, seekGetRelEnd)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -277,7 +277,7 @@ TEST_F(SeekTest, seekGetRelEnd)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekGetRelCurrentNegative)
+TEST_F(seekTest, seekGetRelCurrentNegative)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -320,7 +320,7 @@ TEST_F(SeekTest, seekGetRelCurrentNegative)
     ASSERT_FALSE(file >> people);
 }
 
-TEST_F(SeekTest, seekGetRelCurrentPosative)
+TEST_F(seekTest, seekGetRelCurrentPosative)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);

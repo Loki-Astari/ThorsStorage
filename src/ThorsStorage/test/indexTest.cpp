@@ -9,7 +9,7 @@ namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 using IndexTest = SimpleTestDir;
 
 #ifndef __WINNT
-TEST_F(IndexTest, indexFileCheck)
+TEST_F(indexTest, indexFileCheck)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);

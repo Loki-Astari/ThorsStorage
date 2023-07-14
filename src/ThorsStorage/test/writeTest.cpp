@@ -9,7 +9,7 @@ namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using WriteTest = SimpleTestDir;
 
-TEST_F(WriteTest, writeTwoPeople)
+TEST_F(writeTest, writeTwoPeople)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -42,7 +42,7 @@ TEST_F(WriteTest, writeTwoPeople)
     ASSERT_TRUE(p2ageFile);
 }
 
-TEST_F(WriteTest, readNormal)
+TEST_F(writeTest, readNormal)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
