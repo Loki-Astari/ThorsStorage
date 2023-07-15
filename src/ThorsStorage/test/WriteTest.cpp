@@ -4,39 +4,44 @@
 #include "test/Person.h"
 #include "test/TestFileClass.h"
 
-#ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using ReadTest = SimpleTestDir;
+using WriteTest = SimpleTestDir;
 
-TEST_F(readTest, readTwoPeople)
+TEST_F(WriteTest, writeTwoPeople)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
+        ASSERT_TRUE(file);
         file << TwoPeople{Person{"Martin" ,20}, Person{"Loki", 22}};
         ASSERT_TRUE(file);
     }
 
-    // Just construct and destruct
-    // Make sure it does not throw.
-    TwoPeople               people;
-    TC::File<TwoPeople>     file(simpleTestDir);
-    ASSERT_TRUE(file);
+    std::string     line;
+    int             number;
 
-    file >> people;
-    ASSERT_TRUE(file);
+    std::ifstream   p1nameFile(simpleTestDir + simpleP1Name);
+    std::getline(p1nameFile, line);
+    ASSERT_EQ(line, "Martin");
+    ASSERT_TRUE(p1nameFile);
 
-    ASSERT_EQ(people.personOne.name, "Martin");
-    ASSERT_EQ(people.personOne.age,  20);
-    ASSERT_EQ(people.personTwo.name, "Loki");
-    ASSERT_EQ(people.personTwo.age,  22);
+    std::ifstream   p1ageFile(simpleTestDir + simpleP1Age);
+    p1ageFile.read(reinterpret_cast<char*>(&number), sizeof number);
+    ASSERT_EQ(number, 20);
+    ASSERT_TRUE(p1ageFile);
 
-    TwoPeople               extra;
-    file >> extra;
-    ASSERT_FALSE(file);
+    std::ifstream   p2nameFile(simpleTestDir + simpleP2Name);
+    std::getline(p2nameFile, line);
+    ASSERT_EQ(line, "Loki");
+    ASSERT_TRUE(p2nameFile);
+
+    std::ifstream   p2ageFile(simpleTestDir + simpleP2Age);
+    p2ageFile.read(reinterpret_cast<char*>(&number), sizeof number);
+    ASSERT_EQ(number, 22);
+    ASSERT_TRUE(p2ageFile);
 }
 
-TEST_F(readTest, readNormal)
+TEST_F(WriteTest, readNormal)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -55,13 +60,27 @@ TEST_F(readTest, readNormal)
     ASSERT_FALSE(file >> twoP);
 }
 
-TEST_F(readTest, badReadDoesNotChangeFile)
+TEST_F(WriteTest, badReadDoesNotChangeFile)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
-        file << TwoPeople{Person{"Martin", 20}, Person{"Loki",   22}};
-        file << TwoPeople{Person{"Again",  28}, Person{"Astari", 29}};
-        ASSERT_TRUE(file);
+        TwoPeople   p1{Person{"Martin", 20}, Person{"Loki",   22}};
+        ASSERT_TRUE(
+            file << p1
+        );
+
+        file.setstate(std::ios::failbit);
+        TwoPeople   p2{Person{"BAD",    45}, Person{"STATE",  99}};
+        ASSERT_FALSE(
+            file << p2
+        );
+        file.clear();
+
+
+        TwoPeople   p3{Person{"Again",  28}, Person{"Astari", 29}};
+        ASSERT_TRUE(
+            file << p3
+        );
     }
 
     TwoPeople               twoP;
@@ -72,14 +91,6 @@ TEST_F(readTest, badReadDoesNotChangeFile)
     ASSERT_EQ(twoP.personOne.age,  20);
     ASSERT_EQ(twoP.personTwo.age,  22);
 
-    file.setstate(std::ios::failbit);
-    ASSERT_FALSE(file >> twoP);
-    ASSERT_EQ(twoP.personOne.name, "Martin");
-    ASSERT_EQ(twoP.personTwo.name, "Loki");
-    ASSERT_EQ(twoP.personOne.age,  20);
-    ASSERT_EQ(twoP.personTwo.age,  22);
-
-    file.clear();
     ASSERT_TRUE(file >> twoP);
     ASSERT_EQ(twoP.personOne.name, "Again");
     ASSERT_EQ(twoP.personTwo.name, "Astari");
@@ -88,5 +99,5 @@ TEST_F(readTest, badReadDoesNotChangeFile)
 
     ASSERT_FALSE(file >> twoP);
 }
-#endif
+
 

@@ -4,12 +4,11 @@
 #include "test/Person.h"
 #include "test/TestFileClass.h"
 
-#ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using tellTest = SimpleTestDir;
+using TellTest = SimpleTestDir;
 
-TEST_F(tellTest, tellput)
+TEST_F(TellTest, tellput)
 {
     TC::OFile<TwoPeople>    file(simpleTestDir);
     ASSERT_EQ(file.tellp(), 0);
@@ -24,7 +23,7 @@ TEST_F(tellTest, tellput)
     ASSERT_EQ(file.tellp(), 3);
 }
 
-TEST_F(tellTest, tellget)
+TEST_F(TellTest, tellget)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -49,5 +48,4 @@ TEST_F(tellTest, tellget)
     ASSERT_EQ(file.tellg(), 3);
     ASSERT_EQ(people.personOne.age, 31);
 }
-#endif
 

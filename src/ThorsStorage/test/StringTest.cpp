@@ -4,12 +4,11 @@
 #include "test/Person.h"
 #include "test/TestFileClass.h"
 
-#ifndef __WINNT
 namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
-using stringTest = SimpleTestDir;
+using StringTest = SimpleTestDir;
 
-TEST_F(stringTest, WriteMultoLineString)
+TEST_F(StringTest, WriteMultiLineString)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -26,7 +25,7 @@ TEST_F(stringTest, WriteMultoLineString)
     ASSERT_TRUE(p1nameFile);
 }
 
-TEST_F(stringTest, ReadMultoLineString)
+TEST_F(StringTest, ReadMultoLineString)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -43,5 +42,4 @@ TEST_F(stringTest, ReadMultoLineString)
 
     ASSERT_EQ(twoPerson.personOne.name, "Mult-Line\nString\n1234");
 }
-#endif
 

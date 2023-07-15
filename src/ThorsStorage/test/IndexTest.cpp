@@ -8,8 +8,7 @@ namespace TC=ThorsAnvil::FileSystem::ColumnFormat;
 
 using IndexTest = SimpleTestDir;
 
-#ifndef __WINNT
-TEST_F(indexTest, indexFileCheck)
+TEST_F(IndexTest, indexFileCheck)
 {
     {
         TC::OFile<TwoPeople>    file(simpleTestDir);
@@ -35,5 +34,4 @@ TEST_F(indexTest, indexFileCheck)
 
     ASSERT_EQ(index, 7);    // Loki + '\n'
 }
-#endif
 
