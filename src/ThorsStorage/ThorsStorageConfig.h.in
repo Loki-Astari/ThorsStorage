@@ -8,5 +8,8 @@
 /* For header only convery to inline */
 #undef HEADER_ONLY_INCLUDE
 
+/* Disable test that require files to be locked */
+#undef THOR_DISABLE_TEST_WITH_LOCKED_FILES
+
 #endif
 

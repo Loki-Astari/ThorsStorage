@@ -713,7 +713,8 @@ build
 LIBTOOL
 ThorSerialize_ROOT_LIB
 ThorSerialize_ROOT_DIR
-magicenum_ROOT_DIR
+ThorSerializeHeaderOnly_ROOT_DIR
+MagicEnumHeaderOnly_ROOT_DIR
 CXX_STD_FLAG
 CXXSTDVER
 ExpFlag20
@@ -795,8 +796,10 @@ enable_vera
 enable_colour
 enable_dark_mode
 with_standard
-with_magicenumroot
-with_thorserializeroot
+with_magicenum_header_only_root
+with_thorserialize_header_only_root
+with_thorserialize_root
+enable_test_with_locked_file
 enable_shared
 enable_static
 with_pic
@@ -1455,6 +1458,14 @@ Optional Features:
   --enable-dark-mode      If your background is black some text that was grey
                           is turned yellow
 
+  --disable-test-with-locked-file
+                          Windows does not provide the same locking
+                          capabilities as Linux. Thus during testing when we
+                          try and lock files, it does not work, so that an
+                          attempt to open them would fail. Unfortunately we
+                          can't lock the files and thus the test pass. Don't
+                          run these tests on Windows.
+
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1474,10 +1485,15 @@ Optional Packages:
                           Use the specified version <version> of the C++
                           standard
 
-  --with-magicenumroot=<location>
-                          Directory of MagicEnum_ROOT
+  --with-magicenum-header-only-root=<location>
+                          Directory of MagicEnumHeaderOnly include folder: the
+                          folder that has the include file
 
-  --with-thorserializeroot=<location>
+  --with-thorserialize-header-only-root=<location>
+                          Directory of ThorSerializeHeaderOnly include folder:
+                          the folder that has the include file
+
+  --with-thorserialize-root=<location>
                           Define the root directory of package Thors
                           Serializer
 
@@ -4657,17 +4673,18 @@ fi
 
 
 
-# Check whether --with-magicenumroot was given.
-if test ${with_magicenumroot+y}
+
+# Check whether --with-magicenum-header-only-root was given.
+if test ${with_magicenum_header_only_root+y}
 then :
-  withval=$with_magicenumroot;
+  withval=$with_magicenum_header_only_root;
 fi
 
 
-    INCLUDE_DIR="-I ${with_magicenumroot}/include"
-    if test "x${with_magicenumroot}" == "x"
+    INCLUDE_DIR="-I${with_magicenum_header_only_root}"
+    if test "x${with_magicenum_header_only_root}" == "x"
 then :
-  INCLUDE_DIR="-I${DefaultLinkDir}/include"
+  INCLUDE_DIR="-I${DefaultLinkDir}"
 
 fi
 
@@ -4678,20 +4695,24 @@ fi
 if test "x$ac_cv_header_magic_enum_hpp" = xyes
 then :
 
-            if test "x${with_magicenumroot}" != "x"
+            if test "x${with_magicenum_header_only_root}" != "x"
 then :
 
 
-printf "%s\n" "#define HAVE_MagicEnum 1" >>confdefs.h
+printf "%s\n" "#define HAVE_MagicEnumHeaderOnly 1" >>confdefs.h
 
-                    magicenum_ROOT_DIR=${with_magicenumroot}
+                    magicenum_header_only_defined=1
+                    MagicEnumHeaderOnly_ROOT_DIR=${with_magicenum_header_only_root}
 
-                    subconfigure="${subconfigure} --with-magicenumroot=${with_magicenumroot}"
+                    subconfigure="${subconfigure} --with-magicenum-header-only-root=${with_magicenum_header_only_root}"
 
 
 fi
 
 else $as_nop
+
+            if test "1" == "1"
+then :
   as_fn_error $? "
 Could not find the header file <magic-enum.hpp>.
 You can install this with
@@ -4699,9 +4720,12 @@ You can install this with
     brew install magic_enum
 
 Alternately if you have manually installed magic_enum you can specify its location with
-    --with-magicenumroot=<location of magic_enum installation>
+    --with-magicenum-root=<location of magic_enum installation>
 
             " "$LINENO" 5
+
+fi
+
 
 fi
 
@@ -4713,39 +4737,106 @@ fi
 
 
 
-# Check whether --with-thorserializeroot was given.
-if test ${with_thorserializeroot+y}
+
+# Check whether --with-thorserialize-header-only-root was given.
+if test ${with_thorserialize_header_only_root+y}
 then :
-  withval=$with_thorserializeroot;
+  withval=$with_thorserialize_header_only_root;
 fi
 
 
-    LIBRARY_DIR="-L ${with_thorserializeroot}/lib"
-    if test "x${with_thorserializeroot}" == "x"
+    INCLUDE_DIR="-I${with_thorserialize_header_only_root}"
+    if test "x${with_thorserialize_header_only_root}" == "x"
+then :
+  INCLUDE_DIR="-I${DefaultLinkDir}"
+
+fi
+
+    ORIG_CXXFLAGS="${CXXFLAGS}"
+    CXXFLAGS="${CXXFLAGS} ${CXX_STD_FLAG} ${INCLUDE_DIR}"
+
+    ac_fn_cxx_check_header_compile "$LINENO" "ThorSerialize/ThorsSerializerUtil.h" "ac_cv_header_ThorSerialize_ThorsSerializerUtil_h" "$ac_includes_default"
+if test "x$ac_cv_header_ThorSerialize_ThorsSerializerUtil_h" = xyes
+then :
+
+            if test "x${with_thorserialize_header_only_root}" != "x"
+then :
+
+
+printf "%s\n" "#define HAVE_ThorSerializeHeaderOnly 1" >>confdefs.h
+
+                    thorserialize_header_only_defined=1
+                    ThorSerializeHeaderOnly_ROOT_DIR=${with_thorserialize_header_only_root}
+
+                    subconfigure="${subconfigure} --with-thorserialize-header-only-root=${with_thorserialize_header_only_root}"
+
+
+fi
+
+else $as_nop
+
+            if test "0" == "1"
+then :
+  as_fn_error $? "
+Could not find the header file <ThorSerialize/ThorsSerializerUtil.h>
+
+    You can install this with:
+
+        git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsSerializer.git <Location>
+
+        ./configure --with-thorserialize-header-only-root=<Location>
+
+
+    " "$LINENO" 5
+
+fi
+
+
+fi
+
+
+    CXXFLAGS="${ORIG_CXXFLAGS}"
+
+
+
+
+
+# Check whether --with-thorserialize-root was given.
+if test ${with_thorserialize_root+y}
+then :
+  withval=$with_thorserialize_root;
+fi
+
+
+    LIBRARY_DIR="-L ${with_thorserialize_root}/lib"
+    if test "x${with_thorserialize_root}" == "x"
 then :
   LIBRARY_DIR="-L ${DefaultLinkDir}/lib"
 
 fi
 
-    ORIG_LDFLAGS="${LDFLAGS}"
-    LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+    if test "x${thorserialize_header_only_defined}" == "x"
+then :
 
-    echo "Building: ThorsSerializer"
-    echo "Mark:     $BUILDING_ThorsSerializer"
-    echo "Checking"
-    if test "x$BUILDING_ThorsSerializer" == "x1"
+            ORIG_LDFLAGS="${LDFLAGS}"
+            LDFLAGS="$LDFLAGS ${LIBRARY_DIR}"
+
+            echo "Building: ThorsSerializer"
+            echo "Mark:     $BUILDING_ThorsSerializer"
+            echo "Checking"
+            if test "x$BUILDING_ThorsSerializer" == "x1"
 then :
 
 
-    if test "x${with_thorserializeroot}" != "x"
+    if test "x${with_thorserialize_root}" != "x"
 then :
 
 
 printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
 
-            ThorSerialize_ROOT_DIR=${with_thorserializeroot}
+            ThorSerialize_ROOT_DIR=${with_thorserialize_root}
 
-            subconfigure="${subconfigure} --with-thorserializeroot=${with_thorserializeroot}"
+            subconfigure="${subconfigure} --with-thorserialize-root=${with_thorserialize_root}"
 
 
 fi
@@ -4756,7 +4847,7 @@ fi
 
 else $as_nop
 
-            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize17" >&5
+                    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize17" >&5
 printf %s "checking for _ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv in -lThorSerialize17... " >&6; }
 if test ${ac_cv_lib_ThorSerialize17__ZN10ThorsAnvil9Serialize10JsonParser12getNextTokenEv+y}
 then :
@@ -4794,15 +4885,15 @@ if test "x$ac_cv_lib_ThorSerialize17__ZN10ThorsAnvil9Serialize10JsonParser12getN
 then :
 
 
-    if test "x${with_thorserializeroot}" != "x"
+    if test "x${with_thorserialize_root}" != "x"
 then :
 
 
 printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
 
-            ThorSerialize_ROOT_DIR=${with_thorserializeroot}
+            ThorSerialize_ROOT_DIR=${with_thorserialize_root}
 
-            subconfigure="${subconfigure} --with-thorserializeroot=${with_thorserializeroot}"
+            subconfigure="${subconfigure} --with-thorserialize-root=${with_thorserialize_root}"
 
 
 fi
@@ -4813,19 +4904,19 @@ fi
 
 else $as_nop
 
-                    echo "FAIL: Using: >${with_thorserializeroot}<"
-                    as_fn_error $? "
+                            echo "FAIL: Using: >${with_thorserialize_root}<"
+                            as_fn_error $? "
 Error: Could not find libThorSerialize17
 
 You can solve this by installing Thors Serializer
     brew install thors-serializer
 
 Alternately specify install location with:
-    --with-thorserializeroot=<location of snappy installation>
+    --with-thorserialize-root=<location of snappy installation>
 
 
     " "$LINENO" 5
-                    echo "FAIL DONE"
+                            echo "FAIL DONE"
 
 
 fi
@@ -4833,9 +4924,40 @@ fi
 
 
 fi
-    echo "Checking DONE"
+            echo "Checking DONE"
 
-    LDFLAGS="${ORIG_LDFLAGS}"
+            LDFLAGS="${ORIG_LDFLAGS}"
+
+
+fi
+
+
+
+
+
+    # Check whether --enable-test-with-locked-file was given.
+if test ${enable_test_with_locked_file+y}
+then :
+  enableval=$enable_test_with_locked_file;
+fi
+
+
+    if test "x${enable_test_with_locked_file}" == "xno"
+then :
+
+
+printf "%s\n" "#define THOR_DISABLE_TEST_WITH_LOCKED_FILES 1" >>confdefs.h
+
+            subconfigure="${subconfigure} --disable-test-with-locked-file";
+
+else $as_nop
+
+
+printf "%s\n" "#define THOR_DISABLE_TEST_WITH_LOCKED_FILES 0" >>confdefs.h
+
+
+
+fi
 
 
 
@@ -17667,10 +17789,17 @@ AM_BACKSLASH='\'
     if test "x${UNAME}" = "xMSYS_NT" || test "x${UNAME}" = "xMINGW64_NT"
 then :
 
-        echo "    Fixing"
-        git config --local core.symlinks true
-        find src/ -type f | xargs -I^ git restore --source=HEAD ^
-        echo "    Fixing DONE"
+        if test ! -e .windows.fix
+then :
+
+                echo "    Fixing"
+                git config --local core.symlinks true
+                find src/ -type f | xargs -I^ git restore --source=HEAD ^
+                echo "    Fixing DONE"
+                touch .windows.fix
+
+
+fi
 
 else $as_nop
 

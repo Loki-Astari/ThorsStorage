@@ -15,7 +15,9 @@ TEST_F(IndexTest, indexFileCheck)
         file << TwoPeople{Person{"Martin" ,20}, Person{"Loki", 22}};
         ASSERT_TRUE(file);
     }
-    std::size_t     index;
+    using I = ThorsAnvil::FileSystem::StrIndex;
+
+    I     index;
 
     std::fstream    index1((simpleTestDir + simpleP1NameI).c_str());
     ASSERT_TRUE(index1);
