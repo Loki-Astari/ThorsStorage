@@ -3,10 +3,10 @@
 
 
 /* Enable to use header only libraries */
-#undef HEADER_ONLY
+#undef THORS_STORAGE_HEADER_ONLY
 
-/* For header only convery to inline */
-#undef HEADER_ONLY_INCLUDE
+/* For header only convert to inline */
+#undef THORS_STORAGE_HEADER_ONLY_INCLUDE
 
 /* Disable test that require files to be locked */
 #undef THOR_DISABLE_TEST_WITH_LOCKED_FILES

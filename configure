@@ -3863,14 +3863,6 @@ fi
 
 
 
-printf "%s\n" "#define HEADER_ONLY 0" >>confdefs.h
-
-
-printf "%s\n" "#define HEADER_ONLY_INCLUDE /**/" >>confdefs.h
-
-
-
-
 
 
 
@@ -4641,6 +4633,14 @@ fi
 
 
 
+
+printf "%s\n" "#define THORS_STORAGE_HEADER_ONLY 0" >>confdefs.h
+
+
+printf "%s\n" "#define THORS_STORAGE_HEADER_ONLY_INCLUDE /**/" >>confdefs.h
+
+
+
 ac_header= ac_cache=
 for ac_item in $ac_header_cxx_list
 do
@@ -4684,7 +4684,7 @@ fi
     INCLUDE_DIR="-I${with_magicenum_header_only_root}"
     if test "x${with_magicenum_header_only_root}" == "x"
 then :
-  INCLUDE_DIR="-I${DefaultLinkDir}"
+  INCLUDE_DIR="-I${DefaultLinkDir}/include"
 
 fi
 
@@ -4748,7 +4748,7 @@ fi
     INCLUDE_DIR="-I${with_thorserialize_header_only_root}"
     if test "x${with_thorserialize_header_only_root}" == "x"
 then :
-  INCLUDE_DIR="-I${DefaultLinkDir}"
+  INCLUDE_DIR="-I${DefaultLinkDir}/include"
 
 fi
 
