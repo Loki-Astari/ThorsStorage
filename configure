@@ -4830,8 +4830,8 @@ printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
 
 
 fi
-    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsLogging"
-    ThorSerialize_ROOT_LIB="ThorSerialize ThorsLogging"
+    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
+    ThorSerialize_ROOT_LIB="ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
 
 
 
@@ -4887,8 +4887,8 @@ printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
 
 
 fi
-    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsLogging"
-    ThorSerialize_ROOT_LIB="ThorSerialize ThorsLogging"
+    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
+    ThorSerialize_ROOT_LIB="ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
 
 
 
@@ -4902,7 +4902,7 @@ You can solve this by installing Thors Serializer
     brew install thors-serializer
 
 Alternately specify install location with:
-    --with-thorserialize-root=<location of snappy installation>
+    --with-thorserialize-root=<location of ThorsDB installation>
 
 
     " "$LINENO" 5
