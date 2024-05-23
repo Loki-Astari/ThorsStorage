@@ -12,6 +12,7 @@ profile/
 report/
 vera/
 makedependency/
+test/
 
 makefile_tmp
 Makefile.extra
