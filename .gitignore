@@ -3,6 +3,8 @@
 .*.swp
 *.gcov
 
+third/confdefs.h
+
 unittest
 
 coverage/
@@ -12,6 +14,7 @@ profile/
 report/
 vera/
 makedependency/
+test/
 
 makefile_tmp
 Makefile.extra
