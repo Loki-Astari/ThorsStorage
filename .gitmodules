@@ -1,9 +1,3 @@
 [submodule ".build"]
 	path = build
 	url = git@github.com:Loki-Astari/ThorMaker.git
-[submodule "third/ThorsLogging"]
-	path = third/ThorsLogging
-	url = git@github.com:Loki-Astari/ThorsLogging.git
-[submodule "third/ThorsIOUtil"]
-	path = third/ThorsIOUtil
-	url = git@github.com:Loki-Astari/ThorsIOUtil.git

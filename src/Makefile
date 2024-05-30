@@ -1,5 +1,5 @@
 THORSANVIL_ROOT             = $(realpath ../)
 
-TARGET                      = ThorsIOUtil ThorsLogging ThorsStorage
+TARGET                      = ThorsStorage
 
 include $(THORSANVIL_ROOT)/build/tools/Project.Makefile
