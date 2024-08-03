@@ -1479,7 +1479,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-standard-version=<version>
                           Use the specified version <version> of the C++
-                          standard. Default 17
+                          standard. Default 20
 
   --with-magicenum-header-only-root=<location>
                           Directory of MagicEnumHeaderOnly include folder: the
@@ -4188,7 +4188,7 @@ fi
 
     if test "x20" == "x"
 then :
-  askedLangFeature=17
+  askedLangFeature=20
 else case e in #(
   e) askedLangFeature=20
      ;;
@@ -18128,14 +18128,7 @@ fi
             echo "================ DONE ================="
             echo
             popd
-
-    export BUILDING_${third}=1
-
-printf "%s\n" "#define THOR_PACKAGE_NAME \${third}" >>confdefs.h
-
-    THOR_PACKAGE_NAME=${third}
-
-
+            ## AX_THOR_BUILDING(${third})
         done
         popd
     fi
@@ -18525,7 +18518,7 @@ fi
 
 
 
-    ac_config_headers="$ac_config_headers config.h src/ThorsStorage/ThorsStorageConfig.h"
+    ac_config_headers="$ac_config_headers config.h src/ThorsStorage/ThorsStorageConfig.h:config.h.in"
 
     ac_config_files="$ac_config_files Makefile.extra Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in"
 
@@ -19644,7 +19637,7 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
-    "src/ThorsStorage/ThorsStorageConfig.h") CONFIG_HEADERS="$CONFIG_HEADERS src/ThorsStorage/ThorsStorageConfig.h" ;;
+    "src/ThorsStorage/ThorsStorageConfig.h") CONFIG_HEADERS="$CONFIG_HEADERS src/ThorsStorage/ThorsStorageConfig.h:config.h.in" ;;
     "Makefile.extra") CONFIG_FILES="$CONFIG_FILES Makefile.extra" ;;
     "Makefile.config") CONFIG_FILES="$CONFIG_FILES Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in" ;;
 

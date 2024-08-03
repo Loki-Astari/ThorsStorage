@@ -16,6 +16,6 @@ AX_THOR_DISABLE_TEST_REQUIREING_LOCK_FILES
 
 LT_INIT
 
-AX_THOR_FUNC_TERM_BUILD([STORAGE], [src/ThorsStorage/ThorsStorageConfig.h])
+AX_THOR_FUNC_TERM_BUILD([STORAGE], [src/ThorsStorage/ThorsStorageConfig.h:config.h.in])
 
 AC_OUTPUT
