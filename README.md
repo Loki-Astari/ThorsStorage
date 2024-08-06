@@ -1,6 +1,5 @@
 # ThorsStorage
 
-[![Build Status](https://travis-ci.com/Loki-Astari/ThorsStorage.svg?branch=master)](https://travis-ci.com/Loki-Astari/ThorsStorage)
 [![Code Review](http://www.zomis.net/codereview/shield/?qid=240341)](http://codereview.stackexchange.com/q/240341/507)
 [![Code Review](http://www.zomis.net/codereview/shield/?qid=240825)](http://codereview.stackexchange.com/q/240825/507)
 
