@@ -704,6 +704,7 @@ build_vendor
 build_cpu
 build
 LIBTOOL
+THOR_DISABLE_TEST_WITH_LOCKED_FILES_DISABLE
 ThorSerialize_ROOT_LIB
 ThorSerialize_ROOT_DIR
 ThorSerializeHeaderOnly_ROOT_DIR
@@ -1457,10 +1458,7 @@ Optional Features:
   --disable-test-with-locked-file
                           Windows does not provide the same locking
                           capabilities as Linux. Thus during testing when we
-                          try and lock files, it does not work, so that an
-                          attempt to open them would fail. Unfortunately we
-                          can't lock the files and thus the test pass. Don't
-                          run these tests on Windows.
+                          try and lock files
 
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
@@ -5068,6 +5066,8 @@ then :
 
 printf "%s\n" "#define THOR_DISABLE_TEST_WITH_LOCKED_FILES 1" >>confdefs.h
 
+            THOR_DISABLE_TEST_WITH_LOCKED_FILES_DISABLE=LOCKED_FILES
+
             subconfigure="${subconfigure} --disable-test-with-locked-file";
 
 else case e in #(
@@ -5076,9 +5076,11 @@ else case e in #(
 printf "%s\n" "#define THOR_DISABLE_TEST_WITH_LOCKED_FILES 0" >>confdefs.h
 
 
+
      ;;
 esac
 fi
+
 
 
 
