@@ -5,7 +5,7 @@
 
 ![ThorStream](img/storage.jpg)
 
-This library depends on files in [ThorsSerializer](https://github.com/Loki-Astari/ThorsSerializer) so you must have this installed first. The easiest way to get ThorsSerializer and this project is simply to install the brew library `thors-serializer`.
+This library depends on files in [ThorsSerializer](https://github.com/Loki-Astari/ThorsSerializer) so you must have this installed first. The easiest way to get ThorsSerializer and this project is simply to install the brew library `thors-mongo`.
 
 This library provides a simple way to save a structure data into multiple files. Each file representing a specific field in the structure. This allows a very efficient scan as most data has a fixed size and variable sized data has a specific index created for the column file.
 
@@ -55,10 +55,10 @@ int main()
 
 Can be installed via brew on Mac and Linux
 
-    brew install thors-serializer
+    brew install thors-mongo
 
-* Mac: https://formulae.brew.sh/formula/thors-serializer
-* Linux: https://formulae.brew.sh/formula-linux/thors-serializer
+* Mac: https://formulae.brew.sh/formula/thors-mongo
+* Linux: https://formulae.brew.sh/formula-linux/thors-mongo
 
 ## Header Only
 
