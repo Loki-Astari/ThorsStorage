@@ -4834,6 +4834,7 @@ then :
 
 printf "%s\n" "#define HAVE_MagicEnumHeaderOnlyV1 1" >>confdefs.h
 
+            magicenum_header_only_found=1
             if test "x${with_magicenum_header_only_root}" != "x"
 then :
 
@@ -4862,7 +4863,7 @@ fi
     CXXFLAGS="${ORIG_CXXFLAGS}"
 
 
-    if test "x${MagicEnumHeaderOnlyV1}" != "x"
+    if test "x${magicenum_header_only_found}" != "x"
 then :
 
             HAVE_MagicEnumHeaderOnly=1
@@ -4900,6 +4901,7 @@ then :
 
 printf "%s\n" "#define HAVE_MagicEnumHeaderOnlyV2 1" >>confdefs.h
 
+            magicenum_header_only_found=1
             if test "x${with_magicenum_header_only_root}" != "x"
 then :
 
@@ -4937,7 +4939,7 @@ fi
 
 
 
-            if test "x${MagicEnumHeaderOnlyV1}" != "x"
+            if test "x${magicenum_header_only_found}" != "x"
 then :
 
                     HAVE_MagicEnumHeaderOnly=1
@@ -4979,6 +4981,7 @@ then :
 
 printf "%s\n" "#define HAVE_ThorSerializeHeaderOnly 1" >>confdefs.h
 
+            thorserialize_header_only_found=1
             if test "x${with_thorserialize_header_only_root}" != "x"
 then :
 
