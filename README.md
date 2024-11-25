@@ -1,3 +1,5 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/G2G216KZR3)
+
 # ThorsStorage
 
 [![Code Review](http://www.zomis.net/codereview/shield/?qid=240341)](http://codereview.stackexchange.com/q/240341/507)
