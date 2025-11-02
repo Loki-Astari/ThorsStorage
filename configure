@@ -5137,9 +5137,12 @@ fi
 
 
 
-    remove="ThorSerialize ThorsSocket ThorsStorage"
-    libs="ThorSerialize ThorsSocket ThorsStorage ThorsLogging ThorsMongo"
-    libs=${libs//"${remove}"/}
+    if [ "ThorsLogging ThorsMongo" == "" ]; then
+        libs="ThorSerialize ThorsSocket ThorsStorage ThorsLogging ThorsMongo"
+    else
+        libs="ThorsLogging ThorsMongo"
+    fi
+
     echo "Libs: ${libs}"
 
 
