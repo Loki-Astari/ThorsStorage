@@ -1,3 +1,4 @@
+CONFIG_NAME					= ThorsStorage
 THORSANVIL_ROOT             ?= $(realpath ../../)
 
 TARGET                      = ThorsStorage.slib
