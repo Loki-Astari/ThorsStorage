@@ -66,7 +66,7 @@ Can be installed via brew on Mac and Linux
 
 To install header only version
 
-    git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsMongo.git
+    git clone --single-branch --branch header-only https://github.com/Loki-Astari/ThorsAnvil.git
 
 ## Contributors
 
