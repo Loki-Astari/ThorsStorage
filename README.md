@@ -7,6 +7,8 @@
 
 ![ThorStream](img/storage.jpg)
 
+**Online documentation:** https://loki-astari.github.io/ThorsAnvil/
+
 This library depends on files in [ThorsSerializer](https://github.com/Loki-Astari/ThorsSerializer) so you must have this installed first. The easiest way to get ThorsSerializer and this project is simply to install the brew library `thors-anvil`.
 
 This library provides a simple way to save a structure data into multiple files. Each file representing a specific field in the structure. This allows a very efficient scan as most data has a fixed size and variable sized data has a specific index created for the column file.
