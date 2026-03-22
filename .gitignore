@@ -3,6 +3,9 @@
 .*.swp
 *.gcov
 
+.cluade
+.clangd
+
 third/confdefs.h
 
 unittest
