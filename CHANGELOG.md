@@ -6,7 +6,8 @@ This component is part of [ThorsAnvil](https://github.com/Loki-Astari/ThorsAnvil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [11.0.0] - 2026-06-24
 
 ### Changed
+- Improved documentation
 - Updated build tools
